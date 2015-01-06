@@ -1,0 +1,20 @@
+{
+  "name": "noinfopath-user",
+  "main": "noinfopath-user.js",
+  "version": "0.0.1",
+  "authors": [
+    "noInfoPath <info@noInfoPath.org> (http://www.noinfopath.org/)"
+  ],
+  "description": "noInfoPath User Module",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.3.8"
+  }
+}
