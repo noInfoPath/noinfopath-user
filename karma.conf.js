@@ -14,10 +14,13 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-     'node_modules/angular/angular.js',
-     'node_modules/angular-mocks/angular-mocks.js',
-     'noinfopath-user.js',
-     'test/**/*.*'
+      'node_modules/angular/angular.js',
+      'node_modules/angular-mocks/angular-mocks.js',
+      'bower_components/ngstorage/ngstorage.js',
+      'bower_components/angular-base64/angular-base64.js',
+      'bower_components/angular-http-auth/src/http-auth-interceptor.js',
+      'test/*.test.js',
+      'noinfopath-user.js'
     ],
 
 
@@ -35,7 +38,7 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress', 'html'],
+    reporters: ['progress','verbose'],
 
 
     // web server port
@@ -48,7 +51,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_WARN,
+    logLevel: config.LOG_INFO,
 
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -57,11 +60,11 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
+    browsers: ['PhantomJS'],
 
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: true
   });
 };

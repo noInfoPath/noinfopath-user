@@ -5,9 +5,13 @@
 (function(angular, undefined){
 	"use strict";
 
+	var $httpProviderRef;
 
 	angular.module('noinfopath.user',['base64','http-auth-interceptor'])
-		
+		.config(['$httpProvider', function($httpProvider){
+			$httpProviderRef  = $httpProvider;
+		}])
+
 		.directive('noLogin', [function(){
 			var noLoginController = ['$scope', 'noLoginService', function($scope, noLoginService){
 				$scope.credentials = {
@@ -29,74 +33,161 @@
 			return dir;
 		}])
 
-		.provider('noTokenService', [function(){
-			var endpointUri;
-
-			function _setEndPointUri(uri){
-				endpointUri = uri;
+		.directive('noUserMenu',['noLoginService', function(noLogin){
+			return {
+				template: "Welcome {{user.username}}",
+				controller: ['$scope', function($scope){
+					$scope.user = noLogin.user();
+				}]
 			}
-			this.setEndPointUri = _setEndPointUri;
-
-			var tokenService = function($http,$base64,authService){
-				var SELF =this,
-					url = endpointUri + "/token";
-
-				this.authenticate = function(clientCreds){
-					$http.post(url, {'':''}, {
-						headers: {
-							"Authorization": "NoInfoPath " + clientCreds
-						},
-						withCredentials: true
-					})
-					.success(function(data, status, headers){
-						authService.loginConfirmed(data);
-					})
-					.error(function(data, status){
-						log.write(status);
-					})
-				}
-			};
 		}])
 
+		// .provider('noTokenService', [function(){
+		// 	var endpointUri;
+
+		// 	function _setEndPointUri(uri){
+		// 		endpointUri = uri;
+		// 	}
+		// 	this.setEndPointUri = _setEndPointUri;
+
+		// 	var tokenService = function($http,$base64,$localStorage, authService){
+		// 		var SELF =this,
+		// 			url = endpointUri + "/token";
+
+		// 		this.authenticate = function(clientCreds, user){
+		// 			//noOnlineStatus.update('Requesting Access Token');
+
+		// 			var payload = {
+		// 				"grant_type":"client_credentials",
+		// 				"token_type":"bearer"
+		// 			};
+
+
+		// 			$http.post(url, payload, {
+		// 				headers: {
+		// 					"Authorization": "Basic " + clientCreds
+		// 				},
+		// 				withCredentials: true
+		// 			})
+		// 			.success(function(data, status, headers){
+		// 				$localStorage.noAuthToken = data;
+		// 				$localStorage.noUser = user;
+		// 				$httpProviderRef.defaults.headers.common.Authorization = data.token_type + " " + data.access_token;						
+		// 				authService.loginConfirmed(data);
+		// 			})
+		// 			.error(function(data, status){
+		// 				log.write(status);
+		// 			})
+		// 		}
+		// 	};
+
+		// 	this.$get = [
+		// 		'$http',
+		// 		'$base64',
+		// 		'$localStorage',
+		// 		'authService',
+		// 		function($http,$base64,$localStorage,authService){
+		// 			return new tokenService($http,$base64,$localStorage,authService);
+		// 		}
+		// 	];
+		// }])
+
 		.provider('noLoginService',  [ function(){
-			var endpointUri;
+			var endpoints = {
+				auth: "",
+				token: ""
+			};
 
-			function _setEndPointUri(uri){
-				endpointUri = uri;
+			this.setAuthEndPoint = function setAuthEndPoint(uri){
+				endpoints.auth = uri;
+			};
+
+			this.getAuthEndPoint = function getAuthEndPoint(){
+				return endpoints.auth;
 			}
-			this.setEndPointUri = _setEndPointUri;
 
-			var loginService = function($http,$base64,authService){
-				var SELF =this,
-					url = endpointUri + "/auth";
+			this.setTokenEndPoint = function setTokenEndPoint(uri){
+				endpoints.token = uri;
+			};
 
-				this.login = function(loginInfo){
+			this.getTokenEndPoint = function getTokenEndPoint(){
+				return endpoints.token;
+			}
+
+			var loginService = function($q,$http,$base64,$localStorage,authService){
+				var SELF =this;
+
+				this.login = function login(loginInfo){
+					var deferred = $q.defer();
+
+					//noOnlineStatus.update('Authenticating');
+
 					var creds = $base64.encode(loginInfo.username + ":" + loginInfo.password);
-					$http.post(url, null, {
+					
+					$http.post(endpoints.auth, null, {
+							headers: {
+								"Authorization": "NoInfoPath " + creds
+							},
+							withCredentials: true
+						})
+						.then(function(resp){	
+							var token = resp.headers('x-no-authorization'),
+								user = resp.data;
+
+							deferred.resolve({token: token, user: user});
+						})
+						.catch(deferred.reject);
+					return deferred.promise;
+				};
+
+				this.authenticate = function authenticate(token, user){
+					//noOnlineStatus.update('Requesting Access Token');
+
+					var deferred = $q.defer(),
+						payload = {
+							"grant_type":"client_credentials",
+							"token_type":"bearer"
+						};
+
+
+					$http.post(endpoints.token, payload, {
 						headers: {
-							"Authorization": "NoInfoPath " + creds
+							"Authorization": "Basic " + token
 						},
 						withCredentials: true
 					})
-					.success(function(data, status, headers){
-						authService.loginConfirmed(data);
+					.then(function(resp){
+						$localStorage.noAuthToken = resp.data.access_token;
+						$localStorage.noUser = user;
+						$httpProviderRef.defaults.headers.common.Authorization = resp.data.token_type + " " + resp.data.access_token;						
+						authService.loginConfirmed(resp.data);
+						deferred.resolve($localStorage.noAuthToken);
 					})
-					.error(function(data, status){
-						log.write(status);
-					})
-				}
+					.catch(deferred.reject);
+
+					return deferred.promise;
+				};
+
+				this.isAuthenticated = function(){ return !!($localStorage.noUser); };
+
+				this.isAuthorized = function() { return !!($localStorage.noAuthToken); };
+
+				this.user = function() { return $localStorage.noUser; };
+
+				this.token = function() { return $localStorage.noAuthToken; };
 			};
 		
 			this.$get = [
+				'$q',
 				'$http',
 				'$base64', 
+				'$localStorage',
 				'authService',
-				function($http,$base64,authService){
-					return new loginService($http,$base64,authService);
+				function($q,$http,$base64,$localStorage,authService){
+					return new loginService($q,$http,$base64,$localStorage, authService);
 				}
-			];;
+			];
 		}])
-
 	;
 })(angular)
 
