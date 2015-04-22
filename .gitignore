@@ -1,3 +1,4 @@
 /node_modules
 /bower_components
 /karma_html
+.DS_Store

@@ -20,7 +20,7 @@ module.exports = function(config) {
       'bower_components/angular-base64/angular-base64.js',
       'bower_components/angular-http-auth/src/http-auth-interceptor.js',
       'test/*.test.js',
-      'noinfopath-user.js'
+      'src/noinfopath-user.js'
     ],
 
 
@@ -65,6 +65,6 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true
+    singleRun: false
   });
 };
