@@ -16,9 +16,13 @@ module.exports = function(config) {
     files: [
       'node_modules/angular/angular.js',
       'node_modules/angular-mocks/angular-mocks.js',
-      'bower_components/ngstorage/ngstorage.js',
+      'node_modules/noinfopath-helpers/src/*.js',
+      'node_modules/noinfopath-data/lib/Dexie.js',
+      'node_modules/noinfopath-data/dist/noinfopath-data.js',
       'bower_components/angular-base64/angular-base64.js',
       'bower_components/angular-http-auth/src/http-auth-interceptor.js',
+      'bower_components/ng-lodash/build/ng-lodash.js',
+      'test/mock/*.*',
       'test/*.test.js',
       'src/noinfopath-user.js'
     ],

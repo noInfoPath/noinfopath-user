@@ -7,7 +7,8 @@
 
 	var $httpProviderRef;
 
-	angular.module('noinfopath.user',['base64','http-auth-interceptor'])
+	console.log('line 9');
+	angular.module('noinfopath.user',['base64','http-auth-interceptor','noinfopath.data','noinfopath.helpers'])
 		.config(['$httpProvider', function($httpProvider){
 			$httpProviderRef  = $httpProvider;
 		}])
@@ -26,7 +27,7 @@
 			}];
 
 			var dir = {
-				templateUrl: "tmpl/login-directive.html",
+				templateUrl: "templates/login-directive.html",
 				controller: noLoginController
 			};
 
@@ -93,98 +94,91 @@
 		// }])
 
 		.provider('noLoginService',  [ function(){
-			var endpoints = {
-				auth: "",
-				token: ""
-			};
-
-			this.setAuthEndPoint = function setAuthEndPoint(uri){
-				endpoints.auth = uri;
-			};
-
-			this.getAuthEndPoint = function getAuthEndPoint(){
-				return endpoints.auth;
-			}
-
-			this.setTokenEndPoint = function setTokenEndPoint(uri){
-				endpoints.token = uri;
-			};
-
-			this.getTokenEndPoint = function getTokenEndPoint(){
-				return endpoints.token;
-			}
-
-			var loginService = function($q,$http,$base64,$localStorage,authService){
+			
+			
+			var loginService = function($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService){
 				var SELF =this;
 
 				this.login = function login(loginInfo){
 					var deferred = $q.defer();
-
-					//noOnlineStatus.update('Authenticating');
-
-					var creds = $base64.encode(loginInfo.username + ":" + loginInfo.password);
-					
-					$http.post(endpoints.auth, null, {
-							headers: {
-								"Authorization": "NoInfoPath " + creds
+						
+					noConfig.whenReady()
+						.then(function(){
+							var params = {
+								"grant_type": "password",
+								"password": loginInfo.password,
+								"username": loginInfo.username
 							},
-							withCredentials: true
-						})
-						.then(function(resp){	
-							var token = resp.headers('x-no-authorization'),
-								user = resp.data;
+							url = noUrl.makeResourceUrl(noConfig.current.RESTURI, "token");
+							;
 
-							deferred.resolve({token: token, user: user});
-						})
-						.catch(deferred.reject);
+							$http.post(url, null, {
+								headers: {
+									"Content-Type": "appication/x-www-form-urlencoded " 
+								},
+								data: params,
+								withCredentials: true
+							})
+							.then(function(resp){	
+								noLocalStorage.setItem("noUser", resp.data);
+
+								$httpProviderRef.defaults.headers.common.Authorization = resp.data.token_type + " " + resp.data.access_token;						
+						 		authService.loginConfirmed(resp.data);
+								deferred.resolve(resp.data);
+							})
+							.catch(deferred.reject);
+						});
+									
 					return deferred.promise;
 				};
 
-				this.authenticate = function authenticate(token, user){
-					//noOnlineStatus.update('Requesting Access Token');
+				// this.authenticate = function authenticate(token, user){
+				// 	//noOnlineStatus.update('Requesting Access Token');
 
-					var deferred = $q.defer(),
-						payload = {
-							"grant_type":"client_credentials",
-							"token_type":"bearer"
-						};
+				// 	var deferred = $q.defer(),
+				// 		payload = {
+				// 			"grant_type":"client_credentials",
+				// 			"token_type":"bearer"
+				// 		};
 
 
-					$http.post(endpoints.token, payload, {
-						headers: {
-							"Authorization": "Basic " + token
-						},
-						withCredentials: true
-					})
-					.then(function(resp){
-						$localStorage.noAuthToken = resp.data.access_token;
-						$localStorage.noUser = user;
-						$httpProviderRef.defaults.headers.common.Authorization = resp.data.token_type + " " + resp.data.access_token;						
-						authService.loginConfirmed(resp.data);
-						deferred.resolve($localStorage.noAuthToken);
-					})
-					.catch(deferred.reject);
+				// 	$http.post(endpoints.token, payload, {
+				// 		headers: {
+				// 			"Authorization": "Bearer " + token
+				// 		},
+				// 		withCredentials: true
+				// 	})
+				// 	.then(function(resp){
+				// 		noLocalStorage.noAuthToken = resp.data.access_token;
+				// 		noLocalStorage.noUser = user;
+				// 		$httpProviderRef.defaults.headers.common.Authorization = resp.data.token_type + " " + resp.data.access_token;						
+				// 		authService.loginConfirmed(resp.data);
+				// 		deferred.resolve(noLocalStorage.noAuthToken);
+				// 	})
+				// 	.catch(deferred.reject);
 
-					return deferred.promise;
-				};
+				// 	return deferred.promise;
+				// };
 
-				this.isAuthenticated = function(){ return !!($localStorage.noUser); };
+				this.isAuthenticated = function(){ return !!(noLocalStorage.getItem("noUser")); };
 
-				this.isAuthorized = function() { return !!($localStorage.noAuthToken); };
+				this.isAuthorized = function() { return !!(noLocalStorage.getItem("noUser")); };
 
-				this.user = function() { return $localStorage.noUser; };
+				this.user = function() { return noLocalStorage.getItem("noUser"); };
 
-				this.token = function() { return $localStorage.noAuthToken; };
+				this.token = function() { return noLocalStorage.getItem("noUser"); };
 			};
 		
 			this.$get = [
 				'$q',
 				'$http',
 				'$base64', 
-				'$localStorage',
+				'noLocalStorage',
+				'noUrl',
+				'noConfig',
 				'authService',
-				function($q,$http,$base64,$localStorage,authService){
-					return new loginService($q,$http,$base64,$localStorage, authService);
+				function($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService){
+					return new loginService($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService);
 				}
 			];
 		}])

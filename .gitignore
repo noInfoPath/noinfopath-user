@@ -2,3 +2,4 @@
 /bower_components
 /karma_html
 .DS_Store
+/coverage
