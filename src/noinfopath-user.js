@@ -7,10 +7,16 @@
 
 	var $httpProviderRef;
 
-	console.log('line 9');
 	angular.module('noinfopath.user',['base64','http-auth-interceptor','noinfopath.data','noinfopath.helpers'])
-		.config(['$httpProvider', function($httpProvider){
+		.config(['$httpProvider',function($httpProvider){
 			$httpProviderRef  = $httpProvider;
+		}])
+
+		.run(['noLoginService', function(noLoginService){
+			if(noLoginService.isAuthorized){
+				var user = noLoginService.user;
+				$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
+			}
 		}])
 
 		.directive('noLogin', [function(){
@@ -24,11 +30,12 @@
 					log.write($scope.credentials);
 					noLoginService.login($scope.credentials);
 				};
+
 			}];
 
 			var dir = {
-				templateUrl: "templates/login-directive.html",
-				controller: noLoginController
+				require: "A",
+				link: noLoginController
 			};
 
 			return dir;
@@ -43,88 +50,97 @@
 			}
 		}])
 
-		// .provider('noTokenService', [function(){
-		// 	var endpointUri;
+		.provider('noLoginService',  [function(){
+			var _user;
 
-		// 	function _setEndPointUri(uri){
-		// 		endpointUri = uri;
-		// 	}
-		// 	this.setEndPointUri = _setEndPointUri;
+			function noInfoPathUser(data){
+				
 
-		// 	var tokenService = function($http,$base64,$localStorage, authService){
-		// 		var SELF =this,
-		// 			url = endpointUri + "/token";
+				if(angular.isObject(data)){
+					this.token_type = data.token_type;
+					this.access_token = data.access_token;
+					this.username = data.userName;
+					this.expires = new Date(data[".expires"]);
+				}else{
+					var tmp = angular.fromJson(data);
+					angular.extend(this, tmp);
+					this.expires = new Date(this.expires);
+				}
 
-		// 		this.authenticate = function(clientCreds, user){
-		// 			//noOnlineStatus.update('Requesting Access Token');
+				Object.defineProperties(this, {
+					"tokenExpired": {
+						"get": function(){
+							var n = new Date();
+							return n >= this.expires;
+						}
+					}
+				});
 
-		// 			var payload = {
-		// 				"grant_type":"client_credentials",
-		// 				"token_type":"bearer"
-		// 			};
 
+			}
 
-		// 			$http.post(url, payload, {
-		// 				headers: {
-		// 					"Authorization": "Basic " + clientCreds
-		// 				},
-		// 				withCredentials: true
-		// 			})
-		// 			.success(function(data, status, headers){
-		// 				$localStorage.noAuthToken = data;
-		// 				$localStorage.noUser = user;
-		// 				$httpProviderRef.defaults.headers.common.Authorization = data.token_type + " " + data.access_token;						
-		// 				authService.loginConfirmed(data);
-		// 			})
-		// 			.error(function(data, status){
-		// 				log.write(status);
-		// 			})
-		// 		}
-		// 	};
-
-		// 	this.$get = [
-		// 		'$http',
-		// 		'$base64',
-		// 		'$localStorage',
-		// 		'authService',
-		// 		function($http,$base64,$localStorage,authService){
-		// 			return new tokenService($http,$base64,$localStorage,authService);
-		// 		}
-		// 	];
-		// }])
-
-		.provider('noLoginService',  [ function(){
+			window.noInfoPath = window.noInfoPath || {};
+			window.noInfoPath.noInfoPathUser = noInfoPathUser;
 			
-			
-			var loginService = function($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService){
+			var loginService = function($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService, $rootScope){
 				var SELF =this;
+
+				Object.defineProperties(this, {
+					"isAuthenticated": {
+						"get": function(){
+
+						 	return angular.isObject(this.user); 
+						}
+					},
+					"isAuthorized": {
+						"get": function() { 
+							return angular.isObject(this.user) && !this.user.tokenExpired;
+						}
+					},
+					"user": {
+						"get": function() { 
+							//console.log("user:get ", _user, angular.isUndefined(_user));
+							if(angular.isUndefined(_user))
+							{
+								var u = noLocalStorage.getItem("noUser"),
+									j = angular.toJson(u);
+								if(u){
+									_user = new noInfoPathUser(j);
+								}
+							}
+							
+							return _user;
+						}
+					}
+				});
 
 				this.login = function login(loginInfo){
 					var deferred = $q.defer();
 						
 					noConfig.whenReady()
 						.then(function(){
-							var params = {
+							var params = $.param({
 								"grant_type": "password",
 								"password": loginInfo.password,
 								"username": loginInfo.username
-							},
-							url = noUrl.makeResourceUrl(noConfig.current.RESTURI, "token");
-							;
-
-							$http.post(url, null, {
+							}),
+							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
+							
+							$http.post(url, params, {
 								headers: {
-									"Content-Type": "appication/x-www-form-urlencoded " 
+									"Content-Type": "appication/x-www-form-urlencoded" 
 								},
 								data: params,
 								withCredentials: true
 							})
 							.then(function(resp){	
-								noLocalStorage.setItem("noUser", resp.data);
+								var user = new noInfoPathUser(resp.data)
 
-								$httpProviderRef.defaults.headers.common.Authorization = resp.data.token_type + " " + resp.data.access_token;						
-						 		authService.loginConfirmed(resp.data);
-								deferred.resolve(resp.data);
+								noLocalStorage.setItem("noUser", user);
+
+								$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;						
+						 		authService.loginConfirmed(user);
+								deferred.resolve(user);
 							})
 							.catch(deferred.reject);
 						});
@@ -132,41 +148,16 @@
 					return deferred.promise;
 				};
 
-				// this.authenticate = function authenticate(token, user){
-				// 	//noOnlineStatus.update('Requesting Access Token');
+				this.logout = function logout(){
+					noLocalStorage.removeItem("noUser");
+					_user = undefined;
+					$rootScope.$broadcast("noLoginService::loginRequired");
+				}
 
-				// 	var deferred = $q.defer(),
-				// 		payload = {
-				// 			"grant_type":"client_credentials",
-				// 			"token_type":"bearer"
-				// 		};
+				$rootScope.$on("event:auth-loginRequired", function(){
+					$rootScope.$broadcast("noLoginService::loginRequired");
+				});
 
-
-				// 	$http.post(endpoints.token, payload, {
-				// 		headers: {
-				// 			"Authorization": "Bearer " + token
-				// 		},
-				// 		withCredentials: true
-				// 	})
-				// 	.then(function(resp){
-				// 		noLocalStorage.noAuthToken = resp.data.access_token;
-				// 		noLocalStorage.noUser = user;
-				// 		$httpProviderRef.defaults.headers.common.Authorization = resp.data.token_type + " " + resp.data.access_token;						
-				// 		authService.loginConfirmed(resp.data);
-				// 		deferred.resolve(noLocalStorage.noAuthToken);
-				// 	})
-				// 	.catch(deferred.reject);
-
-				// 	return deferred.promise;
-				// };
-
-				this.isAuthenticated = function(){ return !!(noLocalStorage.getItem("noUser")); };
-
-				this.isAuthorized = function() { return !!(noLocalStorage.getItem("noUser")); };
-
-				this.user = function() { return noLocalStorage.getItem("noUser"); };
-
-				this.token = function() { return noLocalStorage.getItem("noUser"); };
 			};
 		
 			this.$get = [
@@ -177,8 +168,9 @@
 				'noUrl',
 				'noConfig',
 				'authService',
-				function($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService){
-					return new loginService($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService);
+				'$rootScope',
+				function($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService, $rootScope){
+					return new loginService($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService, $rootScope);
 				}
 			];
 		}])

@@ -1,7 +1,7 @@
 
 var NoCacheManifest = {
 	request: {
-		url: "http://localhost:3002/NoCacheManifest"
+		url: "http://localhost:3002/odata/NoCacheManifest"
 	},
 	response: {
 		body: {

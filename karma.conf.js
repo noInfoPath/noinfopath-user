@@ -14,11 +14,13 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'node_modules/jquery/dist/jquery.min.js',
       'node_modules/angular/angular.js',
       'node_modules/angular-mocks/angular-mocks.js',
       'node_modules/noinfopath-helpers/src/*.js',
       'node_modules/noinfopath-data/lib/Dexie.js',
       'node_modules/noinfopath-data/dist/noinfopath-data.js',
+      'node_modules/ui-router/angular-ui-router.js',
       'bower_components/angular-base64/angular-base64.js',
       'bower_components/angular-http-auth/src/http-auth-interceptor.js',
       'bower_components/ng-lodash/build/ng-lodash.js',
