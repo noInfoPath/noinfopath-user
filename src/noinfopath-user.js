@@ -1,5 +1,6 @@
 /**
  * NoInfoPath User
+ * version 0.0.2
  */
 
 (function(angular, undefined){
@@ -54,8 +55,6 @@
 			var _user;
 
 			function noInfoPathUser(data){
-				
-
 				if(angular.isObject(data)){
 					this.token_type = data.token_type;
 					this.access_token = data.access_token;
@@ -75,8 +74,6 @@
 						}
 					}
 				});
-
-
 			}
 
 			window.noInfoPath = window.noInfoPath || {};
