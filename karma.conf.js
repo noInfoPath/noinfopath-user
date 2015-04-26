@@ -25,8 +25,10 @@ module.exports = function(config) {
       'bower_components/angular-http-auth/src/http-auth-interceptor.js',
       'bower_components/ng-lodash/build/ng-lodash.js',
       'test/mock/*.*',
-      'test/*.test.js',
-      'src/noinfopath-user.js'
+      'test/*.spec.js',
+      'src/globals.js',
+      'src/login.js',
+      'src/offline.js'
     ],
 
 

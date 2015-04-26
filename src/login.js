@@ -1,8 +1,4 @@
-/**
- * NoInfoPath User
- * version 0.0.3
- */
-
+//login.js
 (function(angular, undefined){
 	"use strict";
 
@@ -130,7 +126,6 @@
 				$rootScope.$on("event:auth-loginRequired", function(){
 					$rootScope.$broadcast("noLoginService::loginRequired");
 				});
-
 			};
 		
 			this.$get = [
@@ -148,6 +143,4 @@
 			];
 		}])
 	;
-})(angular)
-
-
+})(angular);
