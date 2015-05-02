@@ -1,4 +1,4 @@
-//globals.js
+//globals.js@0.0.4
 (function(angular, undefined){
 	"use strict";
 	
