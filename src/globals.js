@@ -1,4 +1,9 @@
-//globals.js@0.0.4
+/*
+noinfopath-user.js 
+version 0.0.5
+*/
+
+//globals.js
 (function(angular, undefined){
 	"use strict";
 	

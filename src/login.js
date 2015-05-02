@@ -4,12 +4,7 @@
 
 	var $httpProviderRef;
 
-	angular.module('noinfopath.user',[
-		'base64',
-		'http-auth-interceptor',
-		'noinfopath.data',
-		'noinfopath.helpers'
-	])
+	angular.module('noinfopath.user')
 	
 		.config(['$httpProvider',function($httpProvider){
 			$httpProviderRef  = $httpProvider;

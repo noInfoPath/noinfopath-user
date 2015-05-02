@@ -9,8 +9,7 @@ module.exports = function(grunt) {
 		    noinfopath: {
 		        src: [
 		        	'src/globals.js',
-		        	'src/login.js',
-		        	'src/directives.js'
+		        	'src/login.js'
 		        ],
 		        dest: 'dist/noinfopath-user.js'
 		    }

@@ -1,4 +1,9 @@
-//globals.js@0.0.4
+/*
+noinfopath-user.js 
+version 0.0.5
+*/
+
+//globals.js
 (function(angular, undefined){
 	"use strict";
 	
@@ -16,12 +21,7 @@
 
 	var $httpProviderRef;
 
-	angular.module('noinfopath.user',[
-		'base64',
-		'http-auth-interceptor',
-		'noinfopath.data',
-		'noinfopath.helpers'
-	])
+	angular.module('noinfopath.user')
 	
 		.config(['$httpProvider',function($httpProvider){
 			$httpProviderRef  = $httpProvider;
@@ -156,40 +156,3 @@
 		}])
 	;
 })(angular);
-//directives.js
-(function(angular, undefined){
-	"use strict";
-
-	angular.module('noinfopath.user')
-	
-		.directive('noLogin', [function(){
-			var noLoginController = ['$scope', 'noLoginService', function($scope, noLoginService){
-				$scope.credentials = {
-					username: null,
-					password: null
-				}
-
-				$scope.login = function(){
-					log.write($scope.credentials);
-					noLoginService.login($scope.credentials);
-				};
-
-			}];
-
-			var dir = {
-				require: "A",
-				link: noLoginController
-			};
-
-			return dir;
-		}])
-
-		.directive('noUserMenu',['noLoginService', function(noLogin){
-			return {
-				template: "Welcome {{user.username}}",
-				controller: ['$scope', function($scope){
-					$scope.user = noLogin.user();
-				}]
-			}
-		}])
-;
