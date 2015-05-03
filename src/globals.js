@@ -9,7 +9,7 @@ version 0.0.5
 	
 	angular.module('noinfopath.user',[
 		'base64',
-		'http-auth-interceptor',
+		/*'http-auth-interceptor',*/
 		'noinfopath.data',
 		'noinfopath.helpers'
 	]);
