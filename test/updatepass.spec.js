@@ -46,7 +46,6 @@ describe("Testing noinfopath-user module", function(){
 			expect(noLoginService.isAuthorized);
 			expect(noLoginService.isAuthenticated);
 			expect(noLoginService.user);
-			//expect(noLoginService.token);
 		});
 
 		var e2eData = {
@@ -60,17 +59,17 @@ describe("Testing noinfopath-user module", function(){
 						.when("GET", "/config.json")
 						.respond(200,mockConfig);
 				
-				$httpBackend
-						.when("GET", NoCacheManifest.request.url)
-						.respond(200,NoCacheManifest.response.body);
+				// $httpBackend
+				//		.when("GET", NoCacheManifest.request.url)
+				//		.respond(200,NoCacheManifest.response.body);
 				
 				$httpBackend
 					.when('POST',req.url)
 					.respond(200, "");
 				
 				noLoginService.updatepass(req.body)
-					.then(function(a,b,c,d,e){
-
+					.then(function(resp){
+						expect(resp.status).toBe(200);
 					})
 					.catch(function(err){
 						console.log("err", err);

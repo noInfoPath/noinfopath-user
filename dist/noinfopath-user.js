@@ -1,6 +1,6 @@
 /*
 noinfopath-user.js 
-version 0.0.5
+version 0.0.6
 */
 
 //globals.js
@@ -15,6 +15,24 @@ version 0.0.5
 	]);
 
 })(angular);
+/*
+noinfopath-user.js 
+version 0.0.6
+*/
+
+//globals.js
+(function(angular, undefined){
+	"use strict";
+	
+	angular.module('noinfopath.user',[
+		'base64',
+		/*'http-auth-interceptor',*/
+		'noinfopath.data',
+		'noinfopath.helpers'
+	]);
+
+})(angular);
+
 //login.js
 (function(angular, undefined){
 	"use strict";
@@ -25,9 +43,6 @@ version 0.0.5
 	
 		.config(['$httpProvider',function($httpProvider){
 			$httpProviderRef  = $httpProvider;
-
-
-
 		}])
 
 
@@ -93,7 +108,7 @@ version 0.0.5
 
 				this.login = function login(loginInfo){
 					var deferred = $q.defer();
-						
+						//console.log("loginInfo",loginInfo);
 					noConfig.whenReady()
 						.then(function(){
 							var params = $.param({
@@ -103,6 +118,7 @@ version 0.0.5
 							}),
 							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
 							
+							//console.log("params",params);
 							$http.post(url, params, {
 								headers: {
 									"Content-Type": "appication/x-www-form-urlencoded" 
@@ -122,6 +138,68 @@ version 0.0.5
 							.catch(deferred.reject);
 						});
 									
+					return deferred.promise;
+				};
+
+				this.register = function register(registerInfo){
+					var deferred = $q.defer();
+
+					noConfig.whenReady()
+						.then(function(){
+							var params = $.param({
+								"Email": registerInfo.email,
+								"Password": registerInfo.password,
+								"ConfirmPassword": registerInfo.confirmPassowrd
+							}),
+							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "api/account/register");
+
+							$http.post(url, params, {
+								headers: {
+									"Content-Type": "application/x-www-form-urlencoded"
+								},
+								data: params,
+								withCredentials: true
+							})
+							.then(function(resp){
+
+								//console.log("registration complete",a,b,c,d,e);
+
+								//$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
+								deferred.resolve(resp);
+							})
+							.catch(deferred.reject);
+						});
+					return deferred.promise;
+				};
+
+				this.updatepass = function register(updatepassInfo){
+					var deferred = $q.defer();
+
+					noConfig.whenReady()
+						.then(function(){
+							var params = $.param({
+								"OldPassword": updatepassInfo.OldPassword,
+								"NewPassword": updatepassInfo.NewPassword,
+								"ConfirmPassword": updatepassInfo.ConfirmPassword
+							}),
+							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "api/account/changepassword");
+
+							$http.post(url, params, {
+								headers: {
+									"Content-Type": "application/x-www-form-urlencoded"
+								},
+								data: params,
+								withCredentials: true
+							})
+							.then(function(resp){
+
+								//console.log("Password Updated",a,b,c,d,e);
+
+								//$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
+								deferred.resolve(resp);
+							})
+							.catch(deferred.reject);
+						});
 					return deferred.promise;
 				};
 
@@ -152,3 +230,4 @@ version 0.0.5
 		}])
 	;
 })(angular);
+

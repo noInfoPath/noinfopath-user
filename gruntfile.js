@@ -23,15 +23,20 @@ module.exports = function(grunt) {
             singleRun: true,
             browsers: ['PhantomJS']
           }
-        }		
+        },
+        bumpup: {
+        	file: 'package.json'
+    	}		
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-karma');
+	grunt.loadNpmTasks('grunt-bumpup');
  
 	//Default task(s).
 	grunt.registerTask('build', ['karma:continuous', 'concat:noinfopath']);
+	grunt.registerTask('bump', ['bumpup']);
 
 };

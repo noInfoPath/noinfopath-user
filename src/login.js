@@ -174,12 +174,12 @@ version 0.0.6
 								data: params,
 								withCredentials: true
 							})
-							.then(function(a,b,c,d,e){
+							.then(function(resp){
 
-								console.log("Password Updated",a,b,c,d,e);
+								//console.log("Password Updated",a,b,c,d,e);
 
 								//$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
-								deferred.resolve(a,b,c,d,e);
+								deferred.resolve(resp);
 							})
 							.catch(deferred.reject);
 						});
