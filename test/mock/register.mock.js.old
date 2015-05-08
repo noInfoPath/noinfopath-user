@@ -1,0 +1,19 @@
+var noRegisterServiceMocks = {
+		noInfoPathUser: "{\"token_type\":\"bearer\",\"access_token\":\"KuQc5Fx5fvj0_hvxqx4T67qZVxLBAhFzW4uKQjjIXgGR29yngsBOZ7HBconWjzQhEeFqq2_yfj8_7eOG4Uwq8FFy6JDQhc6v3dXxkfgaiQKxEiFWgKCea9v0heGI7mwHmHKyyhKpwhzDctqJi3z_cgn4nNP5dQOB9qKkbm_3B3HokSItLDX6TxYcu8ftmcgVfguurR1AyY9FomoNqUhAWxYwXfBv6dir1hmp_ClgT-qhRsvhPhqIQT4AxkBN5tG8fjIaZfmuv3ukN2-sNhsGMAFX0nVNQajc7gmzzOxfKtjA9O8isOAekT1gTMSBsw38_1eloyZA4BsmeRr35upu0ii4m9e9NBvGjY6NFgPy10o6wTwfa6pSkjzIxYvH9kEIYlowSzC9OeB8I-jymExPZwLOvPUOKOdtduvrImUY5jSnqAQRUx0ThIdSE0-lChW_iLHzTrveCAoodtV3u2wN-CA7CnGuoZCzsLGefeLr6c8\",\"username\":\"ryan@ryan.net\",\"expires\":\"2015-05-19T20:38:41.000Z\"}"
+	},
+	expected = {
+		authEndPoint: "http://localhost:3002/api/account/register",
+		ResponseBody: {
+			"access_token": "KuQc5Fx5fvj0_hvxqx4T67qZVxLBAhFzW4uKQjjIXgGR29yngsBOZ7HBconWjzQhEeFqq2_yfj8_7eOG4Uwq8FFy6JDQhc6v3dXxkfgaiQKxEiFWgKCea9v0heGI7mwHmHKyyhKpwhzDctqJi3z_cgn4nNP5dQOB9qKkbm_3B3HokSItLDX6TxYcu8ftmcgVfguurR1AyY9FomoNqUhAWxYwXfBv6dir1hmp_ClgT-qhRsvhPhqIQT4AxkBN5tG8fjIaZfmuv3ukN2-sNhsGMAFX0nVNQajc7gmzzOxfKtjA9O8isOAekT1gTMSBsw38_1eloyZA4BsmeRr35upu0ii4m9e9NBvGjY6NFgPy10o6wTwfa6pSkjzIxYvH9kEIYlowSzC9OeB8I-jymExPZwLOvPUOKOdtduvrImUY5jSnqAQRUx0ThIdSE0-lChW_iLHzTrveCAoodtV3u2wN-CA7CnGuoZCzsLGefeLr6c8",
+			"token_type": "bearer",
+			"expires_in": 1209599,
+			"userName": "ryan@ryan.net",
+			".issued": "Tue, 05 May 2015 20:38:41 GMT",
+			".expires": "Tue, 19 May 2015 20:38:41 GMT"
+		},
+		registerInfo: {
+			"Email": "ryan@ryan.net",
+			"Password": "#1@Test",
+			"ConfirmPassword": "#1@Test"
+		}
+	};

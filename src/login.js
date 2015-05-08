@@ -80,7 +80,7 @@
 
 				this.login = function login(loginInfo){
 					var deferred = $q.defer();
-						
+						console.log("loginInfo",loginInfo);
 					noConfig.whenReady()
 						.then(function(){
 							var params = $.param({
@@ -90,6 +90,7 @@
 							}),
 							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
 							
+							console.log("params",params);
 							$http.post(url, params, {
 								headers: {
 									"Content-Type": "appication/x-www-form-urlencoded" 
@@ -109,6 +110,68 @@
 							.catch(deferred.reject);
 						});
 									
+					return deferred.promise;
+				};
+
+				this.register = function register(registerInfo){
+					var deferred = $q.defer();
+
+					noConfig.whenReady()
+						.then(function(){
+							var params = $.param({
+								"Email": registerInfo.email,
+								"Password": registerInfo.password,
+								"ConfirmPassword": registerInfo.confirmPassowrd
+							}),
+							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "api/account/register");
+
+							$http.post(url, params, {
+								headers: {
+									"Content-Type": "application/x-www-form-urlencoded"
+								},
+								data: params,
+								withCredentials: true
+							})
+							.then(function(a,b,c,d,e){
+
+								console.log("registration complete",a,b,c,d,e);
+
+								//$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
+								deferred.resolve(a,b,c,d,e);
+							})
+							.catch(deferred.reject);
+						});
+					return deferred.promise;
+				};
+
+				this.updatepass = function register(updatepassInfo){
+					var deferred = $q.defer();
+
+					noConfig.whenReady()
+						.then(function(){
+							var params = $.param({
+								"OldPassword": updatepassInfo.OldPassword,
+								"NewPassword": updatepassInfo.NewPassword,
+								"ConfirmPassword": updatepassInfo.ConfirmPassword
+							}),
+							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "api/account/changepassword");
+
+							$http.post(url, params, {
+								headers: {
+									"Content-Type": "application/x-www-form-urlencoded"
+								},
+								data: params,
+								withCredentials: true
+							})
+							.then(function(a,b,c,d,e){
+
+								console.log("Password Updated",a,b,c,d,e);
+
+								//$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
+								deferred.resolve(a,b,c,d,e);
+							})
+							.catch(deferred.reject);
+						});
 					return deferred.promise;
 				};
 
