@@ -26,6 +26,14 @@ module.exports = function(grunt) {
         },
         bumpup: {
         	file: 'package.json'
+    	},
+    	version: {
+    		options: {
+        		prefix: '@version\\s*'
+      		},
+    		defaults: {
+    			src: ['src/globals.js']
+    		}
     	}		
 	});
 
@@ -34,10 +42,12 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-bumpup');
+	grunt.loadNpmTasks('grunt-version');
  
 	//Default task(s).
 	grunt.registerTask('build', ['karma:continuous', 'concat:noinfopath']);
 	grunt.registerTask('bump', ['bumpup']);
-	grunt.resisterTask('final', ['karma:continuous', 'concat:noinfopath', 'bumpup']);
+	grunt.resisterTask('version', ['version']);
+	grunt.resisterTask('final', ['karma:continuous', 'concat:noinfopath', 'bumpup', 'version']);
 
 };
