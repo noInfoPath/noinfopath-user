@@ -9,7 +9,7 @@ version 0.0.5
 	
 	angular.module('noinfopath.user',[
 		'base64',
-		'http-auth-interceptor',
+		/*'http-auth-interceptor',*/
 		'noinfopath.data',
 		'noinfopath.helpers'
 	]);
@@ -25,13 +25,9 @@ version 0.0.5
 	
 		.config(['$httpProvider',function($httpProvider){
 			$httpProviderRef  = $httpProvider;
-		}])
 
-		.run(['noLoginService', function(noLoginService){
-			if(noLoginService.isAuthorized){
-				var user = noLoginService.user;
-				$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
-			}
+
+
 		}])
 
 
@@ -63,7 +59,7 @@ version 0.0.5
 			window.noInfoPath = window.noInfoPath || {};
 			window.noInfoPath.noInfoPathUser = noInfoPathUser;
 			
-			var loginService = function($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService, $rootScope){
+			var loginService = function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope){
 				var SELF =this;
 
 				Object.defineProperties(this, {
@@ -120,7 +116,7 @@ version 0.0.5
 								noLocalStorage.setItem("noUser", user);
 
 								$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;						
-						 		authService.loginConfirmed(user);
+						 		//authService.loginConfirmed(user);
 								deferred.resolve(user);
 							})
 							.catch(deferred.reject);
@@ -147,10 +143,10 @@ version 0.0.5
 				'noLocalStorage',
 				'noUrl',
 				'noConfig',
-				'authService',
+				
 				'$rootScope',
-				function($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService, $rootScope){
-					return new loginService($q,$http,$base64,noLocalStorage,noUrl,noConfig,authService, $rootScope);
+				function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope){
+					return new loginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope);
 				}
 			];
 		}])
