@@ -57,12 +57,12 @@ describe("Testing noinfopath-user module", function(){
 			it("should return an access token.", function(done){
 				
 				$httpBackend
-						.when("GET", "/config.json")
-						.respond(200,mockConfig);
+					.when("GET", "/config.json")
+					.respond(200,mockConfig);
 				
-				$httpBackend
-						.when("GET", NoCacheManifest.request.url)
-						.respond(200,NoCacheManifest.response.body);
+				// $httpBackend
+				// 		.when("GET", NoCacheManifest.request.url)
+				// 		.respond(200,NoCacheManifest.response.body);
 				
 				$httpBackend
 					.when('POST',req.url)
@@ -86,11 +86,15 @@ describe("Testing noinfopath-user module", function(){
 			it("noLoginService.user should return the expected user.", function(){
 				var nou = new noInfoPath.noInfoPathUser(noLoginServiceMocks.login.noInfoPathUser);
 				noLocalStorage.setItem('noUser', nou);
-				var user = angular.toJson(noLoginService.user);
-				//console.log(noLoginService.user);
+				var actual = angular.toJson(noLoginService.user);
+				var expected = noLoginServiceMocks.login.noInfoPathUser;
+
+				//console.log("actual", actual);
+				//console.log("expected",  expected);
 				//console.log(user, noLoginServiceMocks.login.noInfoPathUser);
 				//console.log(user, noLoginServiceMocks.noInfoPathUser)
-				expect(angular.equals(user, angular.toJson(noLoginServiceMocks.login.noInfoPathUser))).toBeTruthy();
+
+				expect(angular.equals(actual, expected)).toBeTruthy();
 			});
 
 			it("noLoginService.isAuthenticated should return true when noLocalStorage.noUser is truthy.", function(){
@@ -107,8 +111,13 @@ describe("Testing noinfopath-user module", function(){
 
 			it("noLoginService.isAuthorized should return true when noLocalStorage.noAuthToken is truthy.", function(){
 				var	t = angular.fromJson(noLoginServiceMocks.login.noInfoPathUser);
-				//t.expires = (new Date(2015,3,1)).toISOString();
+				t.expires = new Date();
+				t.expires = new Date(t.expires.setFullYear(t.expires.getFullYear() + 1));
+				//console.log("Test", t);
 
+				
+				//t.expires.setYear(t.expires.getYear() + 1);
+				//console.log("Test", t);
 				noLocalStorage.setItem('noUser', t);
 
 				expect(noLoginService.isAuthorized).toBe(true);

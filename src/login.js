@@ -91,7 +91,7 @@ version 0.0.6
 
 				this.login = function login(loginInfo){
 					var deferred = $q.defer();
-						console.log("loginInfo",loginInfo);
+						//console.log("loginInfo",loginInfo);
 					noConfig.whenReady()
 						.then(function(){
 							var params = $.param({
@@ -101,7 +101,7 @@ version 0.0.6
 							}),
 							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
 							
-							console.log("params",params);
+							//console.log("params",params);
 							$http.post(url, params, {
 								headers: {
 									"Content-Type": "appication/x-www-form-urlencoded" 
@@ -143,12 +143,12 @@ version 0.0.6
 								data: params,
 								withCredentials: true
 							})
-							.then(function(a,b,c,d,e){
+							.then(function(resp){
 
-								console.log("registration complete",a,b,c,d,e);
+								//console.log("registration complete",a,b,c,d,e);
 
 								//$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
-								deferred.resolve(a,b,c,d,e);
+								deferred.resolve(resp);
 							})
 							.catch(deferred.reject);
 						});

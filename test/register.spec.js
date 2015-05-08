@@ -54,22 +54,22 @@ describe("Testing noinfopath-user module", function(){
 
 		describe("Testing noLoginService.register...", function(){
 
-			it("Should successfully register a user", function(done){
+			it("Should successfully register a user and return a status code of 200", function(done){
 				$httpBackend
-						.when("GET", "/config.json")
-						.respond(200,mockConfig);
+					.when("GET", "/config.json")
+					.respond(200,mockConfig);
 				
-				$httpBackend
-						.when("GET", NoCacheManifest.request.url)
-						.respond(200,NoCacheManifest.response.body);
+				// $httpBackend
+				// 		.when("GET", NoCacheManifest.request.url)
+				// 		.respond(200,NoCacheManifest.response.body);
 				
 				$httpBackend
 					.when('POST',req.url)
 					.respond(200, "");
 
 				noLoginService.register(req.body)
-					.then(function(a,b,c,d,e){
-						
+					.then(function(resp){
+						expect(resp.status).toBe(200);
 					})
 					.catch(function(err){
 						console.log("err", err);
