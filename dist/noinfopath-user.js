@@ -1,6 +1,6 @@
 /*
 noinfopath-user.js 
-version 0.0.6
+@version 0.0.8
 */
 
 //globals.js
@@ -172,7 +172,7 @@ version 0.0.6
 					return deferred.promise;
 				};
 
-				this.updatepass = function register(updatepassInfo){
+				this.updatepass = function updatepass(updatepassInfo){
 					var deferred = $q.defer();
 
 					noConfig.whenReady()

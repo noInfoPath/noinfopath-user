@@ -155,7 +155,7 @@ version 0.0.6
 					return deferred.promise;
 				};
 
-				this.updatepass = function register(updatepassInfo){
+				this.updatepass = function updatepass(updatepassInfo){
 					var deferred = $q.defer();
 
 					noConfig.whenReady()

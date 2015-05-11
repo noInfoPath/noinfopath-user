@@ -47,7 +47,7 @@ module.exports = function(grunt) {
 	//Default task(s).
 	grunt.registerTask('build', ['karma:continuous', 'concat:noinfopath']);
 	grunt.registerTask('bump', ['bumpup']);
-	grunt.resisterTask('version', ['version']);
-	grunt.resisterTask('final', ['karma:continuous', 'concat:noinfopath', 'bumpup', 'version']);
+	grunt.registerTask('version', ['version']);
+	grunt.registerTask('publish', ['karma:continuous','concat:noinfopath']);
 
 };
