@@ -38,16 +38,11 @@ module.exports = function(grunt) {
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-concat');
-	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-bumpup');
 	grunt.loadNpmTasks('grunt-version');
  
 	//Default task(s).
-	grunt.registerTask('build', ['karma:continuous', 'concat:noinfopath']);
-	grunt.registerTask('bump', ['bumpup']);
-	grunt.registerTask('version', ['version']);
-	grunt.registerTask('publish', ['karma:continuous','concat:noinfopath']);
-
+	grunt.registerTask('build', ['karma:continuous', 'bumpup', 'version', 'concat:noinfopath']);
 };
