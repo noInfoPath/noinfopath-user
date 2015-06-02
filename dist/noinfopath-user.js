@@ -1,7 +1,7 @@
-/*
-noinfopath-user.js 
-@version 0.0.8
-*/
+/**
+ * noinfopath-user.js 
+ * @version 0.0.9
+ */
 
 //globals.js
 (function(angular, undefined){
