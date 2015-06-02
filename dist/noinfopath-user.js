@@ -15,23 +15,6 @@ noinfopath-user.js
 	]);
 
 })(angular);
-/*
-noinfopath-user.js 
-version 0.0.6
-*/
-
-//globals.js
-(function(angular, undefined){
-	"use strict";
-	
-	angular.module('noinfopath.user',[
-		'base64',
-		/*'http-auth-interceptor',*/
-		'noinfopath.data',
-		'noinfopath.helpers'
-	]);
-
-})(angular);
 
 //login.js
 (function(angular, undefined){
@@ -149,7 +132,7 @@ version 0.0.6
 							var params = $.param({
 								"Email": registerInfo.email,
 								"Password": registerInfo.password,
-								"ConfirmPassword": registerInfo.confirmPassowrd
+								"ConfirmPassword": registerInfo.confirmPassword
 							}),
 							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "api/account/register");
 
