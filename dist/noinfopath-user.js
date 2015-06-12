@@ -1,6 +1,6 @@
 /**
  * noinfopath-user.js 
- * @version 0.0.9
+ * @version 0.0.10
  */
 
 //globals.js
@@ -15,7 +15,6 @@
 	]);
 
 })(angular);
-
 //login.js
 (function(angular, undefined){
 	"use strict";
@@ -33,16 +32,16 @@
 			var _user;
 
 			function noInfoPathUser(data){
+				var tmp;
 				if(angular.isObject(data)){
-					this.token_type = data.token_type;
-					this.access_token = data.access_token;
-					this.username = data.userName;
-					this.expires = new Date(data[".expires"]);
+					tmp = data;
 				}else{
-					var tmp = angular.fromJson(data);
-					angular.extend(this, tmp);
-					this.expires = new Date(this.expires);
+					tmp = angular.fromJson(data);
+
 				}
+
+				angular.extend(this, tmp);
+				this.expires = new Date(Date.parse(this[".expires"]));
 
 				Object.defineProperties(this, {
 					"tokenExpired": {
@@ -213,4 +212,3 @@
 		}])
 	;
 })(angular);
-

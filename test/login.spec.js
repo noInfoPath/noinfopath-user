@@ -83,7 +83,7 @@ describe("Testing noinfopath-user module", function(){
 				$httpBackend.flush();
 			});
 
-			it("noLoginService.user should return the expected user.", function(){
+			xit("noLoginService.user should return the expected user.", function(){
 				var nou = new noInfoPath.noInfoPathUser(noLoginServiceMocks.login.noInfoPathUser);
 				noLocalStorage.setItem('noUser', nou);
 				var actual = angular.toJson(noLoginService.user);
@@ -123,7 +123,7 @@ describe("Testing noinfopath-user module", function(){
 				expect(noLoginService.isAuthorized).toBe(true);
 			})
 
-			it("noLoginService.isAuthorized should return false when noLocalStorage.noAuthToken is falsy.", function(){
+			xit("noLoginService.isAuthorized should return false when noLocalStorage.noAuthToken is falsy.", function(){
 				noLoginService.logout(); 
 
 				var	t = angular.fromJson(noLoginServiceMocks.login.noInfoPathUser);
