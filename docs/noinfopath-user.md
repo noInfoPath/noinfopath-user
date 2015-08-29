@@ -152,3 +152,5 @@ Undefined
 |isAuthenticated|Bool|Returns true if the there is a valid user stored in local storage|
 |isAuthorized|Bool|Turns true if the isAuthenticated and the bearer token is valid.|
 |user|NoInfoPathUser|A reference to the currently logged in user.|
+
+
