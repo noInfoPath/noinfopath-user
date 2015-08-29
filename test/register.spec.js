@@ -24,20 +24,20 @@ describe("Testing noinfopath-user module", function(){
 			noLoginService = $injector.get('noLoginService');
 			noUrl = $injector.get('noUrl');
 		});
-	});	
+	});
 
 
 	it("Module must implement a provider interface for configuration", function(){
 		expect(noLoginServiceProvider);
 	});
 
-	
+
 	it("Module must implement all expected services", function(){
 		expect(noLoginService);
 	});
 
-	var req = noLoginServiceMocks.register.request
-	var resp = noLoginServiceMocks.register.response
+	var req = noLoginServiceMocks.register.request;
+	var resp = noLoginServiceMocks.register.response;
 
 	describe("Testing noLoginService", function(){
 
@@ -58,11 +58,11 @@ describe("Testing noinfopath-user module", function(){
 				$httpBackend
 					.when("GET", "/config.json")
 					.respond(200,mockConfig);
-				
+
 				// $httpBackend
 				// 		.when("GET", NoCacheManifest.request.url)
 				// 		.respond(200,NoCacheManifest.response.body);
-				
+
 				$httpBackend
 					.when('POST',req.url)
 					.respond(200, "");
@@ -75,10 +75,10 @@ describe("Testing noinfopath-user module", function(){
 						console.log("err", err);
 					})
 					.finally(done);
-				
-				$timeout.flush();	
+
+				$timeout.flush();
 				$httpBackend.flush();
-			});	
+			});
 		});
 	});
 });

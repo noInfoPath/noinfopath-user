@@ -9,7 +9,8 @@ module.exports = function(grunt) {
 		    noinfopath: {
 		        src: [
 		        	'src/globals.js',
-		        	'src/login.js'
+		        	'src/login.js',
+                    'src/directives.js'
 		        ],
 		        dest: 'dist/noinfopath-user.js'
 		    }
@@ -34,7 +35,27 @@ module.exports = function(grunt) {
     		defaults: {
     			src: ['src/globals.js']
     		}
-    	}		
+    	},
+        nodocs: {
+    		"internal": {
+    			options: {
+    				src: 'dist/noinfopath-user.js',
+    				dest: 'docs/noinfopath-user.md',
+    				start: ['/*','/**']
+    			}
+    		},
+    		"public": {
+    			options: {
+    				src: 'dist/noinfopath-user.js',
+    				dest: 'docs/noinfopath-user.md',
+    				start: ['/*']
+    			}
+    		}
+    	},
+        watch: {
+            files: ['src/*.js', 'test/*.spec.js'],
+            tasks: ['unit']
+        },
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-concat');
@@ -42,7 +63,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-bumpup');
 	grunt.loadNpmTasks('grunt-version');
- 
+	grunt.loadNpmTasks('grunt-nodocs');
+
 	//Default task(s).
 	grunt.registerTask('build', ['karma:continuous', 'bumpup', 'version', 'concat:noinfopath']);
+    grunt.registerTask('document', ['concat:noinfopath','nodocs:internal']);
+    grunt.registerTask('unit', ['karma:continuous']);
 };
