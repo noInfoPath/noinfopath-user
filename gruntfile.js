@@ -56,6 +56,10 @@ module.exports = function(grunt) {
             files: ['src/*.js', 'test/*.spec.js'],
             tasks: ['unit']
         },
+        readme: {
+            src: ['docs/noinfopath-user.md'],
+	    	dest: 'readme.md'
+        }
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-concat');
@@ -66,7 +70,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-nodocs');
 
 	//Default task(s).
-	grunt.registerTask('build', ['karma:continuous', 'bumpup', 'version', 'concat:noinfopath']);
+	grunt.registerTask('build', ['karma:continuous', 'bumpup', 'version', 'concat:noinfopath', 'nodocs:internal']);
     grunt.registerTask('document', ['concat:noinfopath','nodocs:internal']);
     grunt.registerTask('unit', ['karma:continuous']);
 };
