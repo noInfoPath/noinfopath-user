@@ -20,7 +20,6 @@
 					tmp = data;
 				}else{
 					tmp = angular.fromJson(data);
-
 				}
 
 				angular.extend(this, tmp);
@@ -81,7 +80,7 @@
 								"password": loginInfo.password,
 								"username": loginInfo.username
 							}),
-							url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
+							url = noUrl.makeResourceUrl(noConfig.current.NOREST, "token");
 							
 							//console.log("params",params);
 							$http.post(url, params, {
