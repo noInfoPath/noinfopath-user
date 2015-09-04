@@ -17,6 +17,7 @@ module.exports = function(config) {
       'node_modules/jquery/dist/jquery.min.js',
       'node_modules/angular/angular.js',
       'node_modules/angular-mocks/angular-mocks.js',
+      'node_modules/noinfopath/dist/noinfopath.js',
       'node_modules/noinfopath-helpers/src/*.js',
       'node_modules/noinfopath-data/lib/Dexie.js',
       'node_modules/noinfopath-data/dist/noinfopath-data.js',

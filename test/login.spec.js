@@ -49,8 +49,8 @@ describe("Testing noinfopath-user module", function(){
 			clientCredentials: null
 		};
 
-		var req = noLoginServiceMocks.login.request
-		var resp = noLoginServiceMocks.login.response
+		var req = noLoginServiceMocks.login.request;
+		var resp = noLoginServiceMocks.login.response;
 
 		describe("Testing noLoginService.login...", function(){
 
@@ -84,7 +84,7 @@ describe("Testing noinfopath-user module", function(){
 			});
 
 			xit("noLoginService.user should return the expected user.", function(){
-				var nou = new noInfoPath.noInfoPathUser(noLoginServiceMocks.login.noInfoPathUser);
+				var nou = new noInfoPath.NoInfoPathUser(noLoginServiceMocks.login.noInfoPathUser);
 				noLocalStorage.setItem('noUser', nou);
 				var actual = angular.toJson(noLoginService.user);
 				var expected = noLoginServiceMocks.login.noInfoPathUser;
@@ -98,10 +98,10 @@ describe("Testing noinfopath-user module", function(){
 			});
 
 			it("noLoginService.isAuthenticated should return true when noLocalStorage.noUser is truthy.", function(){
-				var nou = new noInfoPath.noInfoPathUser(noLoginServiceMocks.noInfoPathUser);
+				var nou = new noInfoPath.NoInfoPathUser(noLoginServiceMocks.noInfoPathUser);
 				noLocalStorage.setItem('noUser', nou);
 				expect(noLoginService.isAuthenticated).toBe(true);
-			})
+			});
 
 			it("noLoginService.isAuthenticated should return false when noLocalStorage.noUser is falsy.", function(){
 				noLoginService.logout();
