@@ -70,7 +70,7 @@
 		});
 	}
 	noInfoPath.NoInfoPathUser = NoInfoPathUser;
-	
+
 	/*
 	 * ## LoginService : Class
 	 * LoginService is a backing class for the noLoginService provider. It provides the
@@ -245,6 +245,7 @@
 					})
 					.catch(deferred.reject);
 				});
+
 
 			return deferred.promise;
 		};

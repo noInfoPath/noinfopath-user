@@ -2,8 +2,8 @@
 //globals.js
 
 /**
- * # noinfopath-user.js
- * @version 0.0.11
+ * noinfopath-user.js
+ * @version 0.1.1
  *
  * The noinfopath.user module contains services, and directives that assist in
  * developing an application that requires as secure and customized user
@@ -95,7 +95,7 @@
 		});
 	}
 	noInfoPath.NoInfoPathUser = NoInfoPathUser;
-	
+
 	/*
 	 * ## LoginService : Class
 	 * LoginService is a backing class for the noLoginService provider. It provides the
@@ -271,6 +271,7 @@
 					.catch(deferred.reject);
 				});
 
+
 			return deferred.promise;
 		};
 
@@ -376,13 +377,13 @@
 	"use strict";
 
 	angular.module('noinfopath.user')
-	
+
 		.directive('noLogin', [function(){
 			var noLoginController = ['$scope', 'noLoginService', function($scope, noLoginService){
 				$scope.credentials = {
 					username: null,
 					password: null
-				}
+				};
 
 				$scope.login = function(){
 					log.write($scope.credentials);
@@ -405,6 +406,7 @@
 				controller: ['$scope', function($scope){
 					$scope.user = noLogin.user();
 				}]
-			}
+			};
 		}])
-;
+	;
+})(angular);
