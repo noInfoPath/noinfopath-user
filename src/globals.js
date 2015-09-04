@@ -1,6 +1,6 @@
 /**
- * noinfopath-user.js 
- * @version 0.0.10
+ * noinfopath-user.js
+ * @version 0.1.0
  */
 
 //globals.js

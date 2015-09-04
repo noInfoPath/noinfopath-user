@@ -34,7 +34,7 @@ module.exports = function(grunt) {
     		defaults: {
     			src: ['src/globals.js']
     		}
-    	}		
+    	}
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-concat');
@@ -42,7 +42,9 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-bumpup');
 	grunt.loadNpmTasks('grunt-version');
- 
+
 	//Default task(s).
 	grunt.registerTask('build', ['karma:continuous', 'bumpup', 'version', 'concat:noinfopath']);
+	grunt.registerTask('test', ['karma:continuous']);
+	grunt.registerTask('documentation', ['concat:noinfopath']);
 };
