@@ -3,13 +3,13 @@
 	"use strict";
 
 	angular.module('noinfopath.user')
-	
+
 		.directive('noLogin', [function(){
 			var noLoginController = ['$scope', 'noLoginService', function($scope, noLoginService){
 				$scope.credentials = {
 					username: null,
 					password: null
-				}
+				};
 
 				$scope.login = function(){
 					log.write($scope.credentials);
@@ -32,6 +32,8 @@
 				controller: ['$scope', function($scope){
 					$scope.user = noLogin.user();
 				}]
-			}
+			};
 		}])
-;
+
+		;
+})(angular);

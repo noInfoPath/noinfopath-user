@@ -70,7 +70,7 @@
 		});
 	}
 	noInfoPath.NoInfoPathUser = NoInfoPathUser;
-	
+
 	/*
 	 * ## LoginService : Class
 	 * LoginService is a backing class for the noLoginService provider. It provides the
@@ -185,6 +185,8 @@
 		var SELF = this,
 			_user;
 
+		$rootScope.failedLoginAttepts = 0;
+
 		Object.defineProperties(this, {
 			"isAuthenticated": {
 				"get": function(){
@@ -214,6 +216,26 @@
 			}
 		});
 
+		this.whenAuthorized = function(){
+			return $q(function(resolve, reject){
+				if(this.isAuthorized)
+				{
+					resolve();
+				}else{
+
+					if($rootScope.failedLoginAttepts === -1){
+						reject("authServiceOffline");
+					}else{
+						if($rootScope.failedLoginAttepts > 3){
+							reject("tooManyFailedLogons");
+						}else{
+							reject("login");
+						}
+					}
+				}
+			}.bind(this));
+		}.bind(this);
+
 		this.login = function login(loginInfo){
 			var deferred = $q.defer();
 				//console.log("loginInfo",loginInfo);
@@ -224,7 +246,7 @@
 						"password": loginInfo.password,
 						"username": loginInfo.username
 					}),
-					url = noUrl.makeResourceUrl(noConfig.current.NOREST, "token");
+					url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
 
 					//console.log("params",params);
 					$http.post(url, params, {
@@ -241,9 +263,25 @@
 
 						$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
 						//authService.loginConfirmed(user);
+						$rootScope.noUserAuth = true;
+						$rootScope.failedLoginAttepts = 0;
 						deferred.resolve(user);
 					})
-					.catch(deferred.reject);
+					.catch(function(err){
+						var msg = "";
+						switch(err.status){
+							case 400:
+								msg = err.data.error_description;
+								$rootScope.failedLoginAttepts++;
+								break;
+							case 0:
+								$rootScope.failedLoginAttepts = -1;
+								msg = "Authentication service is offline.";
+								break;
+						}
+
+						deferred.reject(msg);
+					});
 				});
 
 			return deferred.promise;
@@ -329,19 +367,8 @@
 		}])
 
 
-		.provider('noLoginService',  [function(){
-			this.$get = [
-				'$q',
-				'$http',
-				'$base64',
-				'noLocalStorage',
-				'noUrl',
-				'noConfig',
-				'$rootScope',
-				function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope){
-					return new LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope);
-				}
-			];
+		.factory('noLoginService',  [ '$q', '$http', '$base64', 'noLocalStorage', 'noUrl', 'noConfig', '$rootScope', function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope){
+			return new LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope);
 		}])
 	;
 })(angular);

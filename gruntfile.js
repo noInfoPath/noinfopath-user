@@ -5,6 +5,19 @@ module.exports = function(grunt) {
   	// Project configuration.
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
+        copy: {
+			test: {
+				files: [
+					//{expand:true, flatten:false, src: [ 'lib/js/noinfopath/*.*'], dest: 'build/'},
+					{
+						expand: true,
+						flatten: true,
+						src: ['dist/*.js'],
+						dest: '../noinfopath-test-server-node/no/lib/js/noinfopath/'
+					},
+				]
+			}
+		},
 	    concat: {
 		    noinfopath: {
 		        src: [
@@ -54,7 +67,7 @@ module.exports = function(grunt) {
     	},
         watch: {
             files: ['src/*.js', 'test/*.spec.js'],
-            tasks: ['unit']
+            tasks: ['notest']
         },
         readme: {
             src: ['docs/noinfopath-user.md'],
@@ -62,6 +75,7 @@ module.exports = function(grunt) {
         }
 	});
 
+    grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-karma');
@@ -70,7 +84,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-nodocs');
 
 	//Default task(s).
-	grunt.registerTask('build', ['karma:continuous', 'bumpup', 'version', 'concat:noinfopath', 'nodocs:internal']);
+    grunt.registerTask('build', ['karma:continuous', 'bumpup', 'version', 'concat:noinfopath', 'nodocs:internal']);
+	grunt.registerTask('notest', [ 'concat:noinfopath', 'copy:test']);
     grunt.registerTask('document', ['concat:noinfopath','nodocs:internal']);
     grunt.registerTask('unit', ['karma:continuous']);
 };
