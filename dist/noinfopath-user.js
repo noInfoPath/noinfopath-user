@@ -245,7 +245,11 @@
 			return $q(function(resolve, reject){
 				if(this.isAuthorized)
 				{
-					resolve();
+					$httpProviderRef.defaults.headers.common.Authorization = this.user.token_type + " " + this.user.access_token;
+					//authService.loginConfirmed(user);
+					$rootScope.noUserAuth = true;
+					$rootScope.failedLoginAttepts = 0;
+					resolve(this.user);
 				}else{
 
 					if($rootScope.failedLoginAttepts === -1){
