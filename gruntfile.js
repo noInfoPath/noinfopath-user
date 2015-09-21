@@ -31,7 +31,7 @@ module.exports = function(grunt) {
                 src: ['docs/noinfopath-user.md'],
     	    	dest: 'readme.md'
             }
-            
+
 	 	},
         karma: {
           unit: {
@@ -86,7 +86,8 @@ module.exports = function(grunt) {
 
 	//Default task(s).
     grunt.registerTask('build', ['karma:continuous', 'bumpup', 'version', 'concat:noinfopath', 'nodocs:internal']);
+    grunt.registerTask('compile', ['karma:continuous', 'concat:noinfopath', 'nodocs:internal', 'concat:readme']);
 	grunt.registerTask('notest', [ 'concat:noinfopath', 'copy:test']);
-    grunt.registerTask('document', ['concat:noinfopath','nodocs:internal']);
+    grunt.registerTask('document', ['concat:noinfopath','nodocs:internal', 'concat:readme']);
     grunt.registerTask('unit', ['karma:continuous']);
 };
