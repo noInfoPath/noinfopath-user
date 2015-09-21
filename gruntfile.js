@@ -67,7 +67,7 @@ module.exports = function(grunt) {
     	},
         watch: {
             files: ['src/*.js', 'test/*.spec.js'],
-            tasks: ['notest']
+            tasks: ['karma:unit']
         },
         readme: {
             src: ['docs/noinfopath-user.md'],
