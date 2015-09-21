@@ -26,7 +26,12 @@ module.exports = function(grunt) {
                     'src/directives.js'
 		        ],
 		        dest: 'dist/noinfopath-user.js'
-		    }
+		    },
+            readme: {
+                src: ['docs/noinfopath-user.md'],
+    	    	dest: 'readme.md'
+            }
+            
 	 	},
         karma: {
           unit: {
@@ -68,10 +73,6 @@ module.exports = function(grunt) {
         watch: {
             files: ['src/*.js', 'test/*.spec.js'],
             tasks: ['karma:unit']
-        },
-        readme: {
-            src: ['docs/noinfopath-user.md'],
-	    	dest: 'readme.md'
         }
 	});
 
