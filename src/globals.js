@@ -3,7 +3,7 @@
 
 /**
  * # noinfopath-user.js
- * @version 1.0.0
+ * @version 1.0.1
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
