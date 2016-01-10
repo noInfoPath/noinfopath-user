@@ -44,25 +44,7 @@
 			};
 		}])
 
-		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLocalStorage', function ($scope, $uibModalInstance, noLocalStorage) {
-
-			function clearDb(option){
-				noLocalStorage.removeItem("noUser");
-				noLocalStorage.removeItem("noConfig");
-				noLocalStorage.removeItem("no-nav-bar");
-				noLocalStorage.removeItem("noDbSchema_FCFNv2");
-				noLocalStorage.removeItem("noDbSchema_FCFNv2_Remote");
-				noLocalStorage.removeItem("noDbSchema_NoInfoPath_dtc_v1");
-				noLocalStorage.removeItem("Dexie.Observable/latestRevision/NoInfoPath_dtc_v1");
-				noLocalStorage.removeItem("debug");
-
-				if(option){
-					noLocalStorage.removeItem("dbPopulated_NoInfoPath_dtc_v1");
-					noLocalStorage.removeItem("dbPopulated_FCFNv2");
-				}
-
-				location.href = "/";
-			}
+		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLoginService', function ($scope, $uibModalInstance, noLoginService) {
 
 			$scope.clearStorage = function(option){
 				var clearDatabase = option;
