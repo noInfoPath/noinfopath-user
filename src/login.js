@@ -354,10 +354,23 @@
 			return deferred.promise;
 		};
 
-		this.logout = function logout(){
+		this.logout = function logout(cleardb){
+			_user = "";
 			noLocalStorage.removeItem("noUser");
-			_user = undefined;
-			$rootScope.$broadcast("noLoginService::loginRequired");
+			noLocalStorage.removeItem("noConfig");
+			noLocalStorage.removeItem("no-nav-bar");
+			noLocalStorage.removeItem("noDbSchema_FCFNv2");
+			noLocalStorage.removeItem("noDbSchema_FCFNv2_Remote");
+			noLocalStorage.removeItem("noDbSchema_NoInfoPath_dtc_v1");
+			noLocalStorage.removeItem("Dexie.Observable/latestRevision/NoInfoPath_dtc_v1");
+			noLocalStorage.removeItem("debug");
+
+			if(cleardb){
+				noLocalStorage.removeItem("dbPopulated_NoInfoPath_dtc_v1");
+				noLocalStorage.removeItem("dbPopulated_FCFNv2");
+			}
+
+			location.href = "/";
 		};
 
 		$rootScope.$on("event:auth-loginRequired", function(){

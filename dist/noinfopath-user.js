@@ -3,7 +3,7 @@
 
 /**
  * # noinfopath-user.js
- * @version 1.0.1
+ * @version 1.0.2
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -380,10 +380,23 @@
 			return deferred.promise;
 		};
 
-		this.logout = function logout(){
+		this.logout = function logout(cleardb){
+			_user = "";
 			noLocalStorage.removeItem("noUser");
-			_user = undefined;
-			$rootScope.$broadcast("noLoginService::loginRequired");
+			noLocalStorage.removeItem("noConfig");
+			noLocalStorage.removeItem("no-nav-bar");
+			noLocalStorage.removeItem("noDbSchema_FCFNv2");
+			noLocalStorage.removeItem("noDbSchema_FCFNv2_Remote");
+			noLocalStorage.removeItem("noDbSchema_NoInfoPath_dtc_v1");
+			noLocalStorage.removeItem("Dexie.Observable/latestRevision/NoInfoPath_dtc_v1");
+			noLocalStorage.removeItem("debug");
+
+			if(cleardb){
+				noLocalStorage.removeItem("dbPopulated_NoInfoPath_dtc_v1");
+				noLocalStorage.removeItem("dbPopulated_FCFNv2");
+			}
+
+			location.href = "/";
 		};
 
 		$rootScope.$on("event:auth-loginRequired", function(){
@@ -450,25 +463,7 @@
 			};
 		}])
 
-		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLocalStorage', function ($scope, $uibModalInstance, noLocalStorage) {
-
-			function clearDb(option){
-				noLocalStorage.removeItem("noUser");
-				noLocalStorage.removeItem("noConfig");
-				noLocalStorage.removeItem("no-nav-bar");
-				noLocalStorage.removeItem("noDbSchema_FCFNv2");
-				noLocalStorage.removeItem("noDbSchema_FCFNv2_Remote");
-				noLocalStorage.removeItem("noDbSchema_NoInfoPath_dtc_v1");
-				noLocalStorage.removeItem("Dexie.Observable/latestRevision/NoInfoPath_dtc_v1");
-				noLocalStorage.removeItem("debug");
-
-				if(option){
-					noLocalStorage.removeItem("dbPopulated_NoInfoPath_dtc_v1");
-					noLocalStorage.removeItem("dbPopulated_FCFNv2");
-				}
-
-				location.href = "/";
-			}
+		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLoginService', function ($scope, $uibModalInstance, noLoginService) {
 
 			$scope.clearStorage = function(option){
 				var clearDatabase = option;
