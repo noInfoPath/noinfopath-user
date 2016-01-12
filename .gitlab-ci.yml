@@ -5,4 +5,4 @@ test1:
     script:
         - npm install
         - bower install
-        - xvfb-run grunt karma:noWebSQL2_ci
+        - xvfb-run grunt karma:continuous
