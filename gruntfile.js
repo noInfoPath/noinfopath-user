@@ -40,7 +40,7 @@ module.exports = function(grunt) {
           continuous: {
             configFile: 'karma.conf.js',
             singleRun: true,
-            browsers: ['PhantomJS']
+            browsers: ['Chrome']
           }
         },
         bumpup: {
@@ -91,4 +91,5 @@ module.exports = function(grunt) {
 	grunt.registerTask('notest', [ 'concat:noinfopath', 'copy:test']);
     grunt.registerTask('document', ['concat:noinfopath','nodocs:internal', 'concat:readme']);
     grunt.registerTask('unit', ['karma:continuous']);
+    grunt.registerTask('test', ['karma:unit']);
 };

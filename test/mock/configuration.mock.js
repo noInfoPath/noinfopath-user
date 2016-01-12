@@ -6,5 +6,23 @@ var mockConfig = {
 	"IndexedDB" : {
 		"name": "NoInfoPath-v3",
 		"version": 1
+	},
+	"localStores":{
+		"nonDBStores": [
+			"noConfig",
+			"no-nav-bar",
+			"noDbSchema_FCFNv2",
+			"noDbSchema_FCFNv2_Remote",
+			"noDbSchema_NoInfoPath_dtc_v1",
+			"Dexie.Observable/latestRevision/NoInfoPath_dtc_v1",
+			"debug"
+		],
+		"dbStores": {
+			"clearDB": true,
+			"stores":[
+				"dbPopulated_NoInfoPath_dtc_v1",
+				"dbPopulated_FCFNv2"
+			]
+		}
 	}
 };
