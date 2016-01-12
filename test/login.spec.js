@@ -113,7 +113,7 @@ describe("Testing noinfopath-user module", function(){
 			});
 
 			it("noLoginService.isAuthenticated should return false when noLocalStorage.noUser is falsy.", function(){
-				noLoginService.logout();
+				noLoginService.logout(mockConfig.localStores);
 				//console.log("noLoginService.isAuthenticated", noLoginService.user)
 				expect(noLoginService.isAuthenticated).toBe(false);
 			});

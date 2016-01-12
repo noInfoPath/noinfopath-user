@@ -44,12 +44,15 @@
 			};
 		}])
 
-		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLoginService', function ($scope, $uibModalInstance, noLoginService) {
+		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLoginService', "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
 
 			$scope.clearStorage = function(option){
-				var clearDatabase = option;
+				var clearDatabase = option,
+					localStores = noConfig.current.localStores;
 
-				clearDb(clearDatabase);
+				noLoginService.logout(localStores,clearDatabase);
+
+				location.href = "/";
 			};
 
 			$scope.close = function () {

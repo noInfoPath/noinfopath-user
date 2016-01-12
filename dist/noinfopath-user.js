@@ -3,7 +3,7 @@
 
 /**
  * # noinfopath-user.js
- * @version 1.0.2
+ * @version 1.0.3
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -216,7 +216,6 @@
 		Object.defineProperties(this, {
 			"isAuthenticated": {
 				"get": function(){
-
 					return angular.isObject(this.user);
 				}
 			},
@@ -380,23 +379,19 @@
 			return deferred.promise;
 		};
 
-		this.logout = function logout(cleardb){
+		this.logout = function logout(stores, cleardb){
 			_user = "";
 			noLocalStorage.removeItem("noUser");
-			noLocalStorage.removeItem("noConfig");
-			noLocalStorage.removeItem("no-nav-bar");
-			noLocalStorage.removeItem("noDbSchema_FCFNv2");
-			noLocalStorage.removeItem("noDbSchema_FCFNv2_Remote");
-			noLocalStorage.removeItem("noDbSchema_NoInfoPath_dtc_v1");
-			noLocalStorage.removeItem("Dexie.Observable/latestRevision/NoInfoPath_dtc_v1");
-			noLocalStorage.removeItem("debug");
 
-			if(cleardb){
-				noLocalStorage.removeItem("dbPopulated_NoInfoPath_dtc_v1");
-				noLocalStorage.removeItem("dbPopulated_FCFNv2");
+			for(var s in stores.nonDBStores){
+				noLocalStorage.removeItem(stores.nonDBStores[s]);
 			}
 
-			location.href = "/";
+			if(cleardb && (stores.dbStores.clearDB === true)){
+				for(var d in stores.dbStores.stores){
+					noLocalStorage.removeItem(stores.dbStores.stores[d]);
+				}
+			}
 		};
 
 		$rootScope.$on("event:auth-loginRequired", function(){
@@ -463,12 +458,15 @@
 			};
 		}])
 
-		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLoginService', function ($scope, $uibModalInstance, noLoginService) {
+		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLoginService', "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
 
 			$scope.clearStorage = function(option){
-				var clearDatabase = option;
+				var clearDatabase = option,
+					localStores = noConfig.current.localStores;
 
-				clearDb(clearDatabase);
+				noLoginService.logout(localStores,clearDatabase);
+
+				location.href = "/";
 			};
 
 			$scope.close = function () {

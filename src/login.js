@@ -190,7 +190,6 @@
 		Object.defineProperties(this, {
 			"isAuthenticated": {
 				"get": function(){
-
 					return angular.isObject(this.user);
 				}
 			},
@@ -354,23 +353,19 @@
 			return deferred.promise;
 		};
 
-		this.logout = function logout(cleardb){
+		this.logout = function logout(stores, cleardb){
 			_user = "";
 			noLocalStorage.removeItem("noUser");
-			noLocalStorage.removeItem("noConfig");
-			noLocalStorage.removeItem("no-nav-bar");
-			noLocalStorage.removeItem("noDbSchema_FCFNv2");
-			noLocalStorage.removeItem("noDbSchema_FCFNv2_Remote");
-			noLocalStorage.removeItem("noDbSchema_NoInfoPath_dtc_v1");
-			noLocalStorage.removeItem("Dexie.Observable/latestRevision/NoInfoPath_dtc_v1");
-			noLocalStorage.removeItem("debug");
 
-			if(cleardb){
-				noLocalStorage.removeItem("dbPopulated_NoInfoPath_dtc_v1");
-				noLocalStorage.removeItem("dbPopulated_FCFNv2");
+			for(var s in stores.nonDBStores){
+				noLocalStorage.removeItem(stores.nonDBStores[s]);
 			}
 
-			location.href = "/";
+			if(cleardb && (stores.dbStores.clearDB === true)){
+				for(var d in stores.dbStores.stores){
+					noLocalStorage.removeItem(stores.dbStores.stores[d]);
+				}
+			}
 		};
 
 		$rootScope.$on("event:auth-loginRequired", function(){

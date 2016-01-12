@@ -22,7 +22,7 @@ module.exports = function(config) {
 			'node_modules/noinfopath-helpers/src/*.js',
 			'node_modules/noinfopath-data/dist/noinfopath-dexie.js',
 			'node_modules/noinfopath-data/dist/noinfopath-data.js',
-			'node_modules/noinfopath-data/node_modules/noinfopath-logger/dist/noinfopath-logger.js',
+			'node_modules/@noinfopath/noinfopath-logger/dist/noinfopath-logger.js',
 			'node_modules/ui-router/angular-ui-router.js',
 			'bower_components/angular-base64/angular-base64.js',
 			'bower_components/angular-http-auth/src/http-auth-interceptor.js',
@@ -43,9 +43,9 @@ module.exports = function(config) {
 
 		// preprocess matching files before serving them to the browser
 		// available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-		preprocessors: {
-		    'src/*.js': 'coverage'
-		},
+		// preprocessors: {
+		//     'src/*.js': 'coverage'
+		// },
 
 		coverageReporter: {
 		    type: 'cobertura',
@@ -79,7 +79,7 @@ module.exports = function(config) {
 
 		// start these browsers
 		// available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-		browsers: ['PhantomJS'],
+		browsers: ['Chrome'],
 
 
 		// Continuous Integration mode
