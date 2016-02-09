@@ -357,8 +357,10 @@
 			_user = "";
 			noLocalStorage.removeItem("noUser");
 
-			for(var s in stores.nonDBStores){
-				noLocalStorage.removeItem(stores.nonDBStores[s]);
+			if(stores && stores.nonDBStores){
+				for(var s in stores.nonDBStores){
+					noLocalStorage.removeItem(stores.nonDBStores[s]);
+				}
 			}
 
 			if(cleardb && (stores.dbStores.clearDB === true)){
