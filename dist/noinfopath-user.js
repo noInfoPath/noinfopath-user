@@ -448,7 +448,7 @@
 				controller: ['$scope','$uibModal', function($scope, $uibModal){
 					$scope.user = noLoginService.user;
 
-					var localStoresExists = noConfig.current.localStores ? noConfig.current.localStores : null,
+					var localStoresExists = noConfig.current.localStores ? true : false,
 						databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
 						logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
 
@@ -457,7 +457,7 @@
 					      	animation: true,
 							controller: 'userLogoutController',
 						  	backdrop: 'static',
-					      	template: localStoresExists ? databaseLogoutTemplate : logoutModal
+					      	template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
 					    });
 					};
 				}]
