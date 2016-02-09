@@ -3,7 +3,7 @@
 
 /**
  * # noinfopath-user.js
- * @version 1.0.3
+ * @version 1.0.4
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -383,8 +383,10 @@
 			_user = "";
 			noLocalStorage.removeItem("noUser");
 
-			for(var s in stores.nonDBStores){
-				noLocalStorage.removeItem(stores.nonDBStores[s]);
+			if(stores && stores.nonDBStores){
+				for(var s in stores.nonDBStores){
+					noLocalStorage.removeItem(stores.nonDBStores[s]);
+				}
 			}
 
 			if(cleardb && (stores.dbStores.clearDB === true)){
@@ -440,18 +442,22 @@
 			return dir;
 		}])
 
-		.directive('noUserMenu',['noLoginService', function(noLogin){
+		.directive('noUserMenu',['noLoginService', 'noConfig', function(noLoginService, noConfig){
 			return {
 				template: "Welcome {{user.username}}",
 				controller: ['$scope','$uibModal', function($scope, $uibModal){
-					$scope.user = noLogin.user;
+					$scope.user = noLoginService.user;
+
+					var localStoresExists = noConfig.current.localStores ? noConfig.current.localStores : null,
+						databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
+						logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
 
 					$scope.logoutModal = function () {
 					    var modalInstance = $uibModal.open({
 					      	animation: true,
 							controller: 'userLogoutController',
 						  	backdrop: 'static',
-					      	template: '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="clearStorage(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="clearStorage(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>'
+					      	template: localStoresExists ? databaseLogoutTemplate : logoutModal
 					    });
 					};
 				}]
@@ -459,10 +465,14 @@
 		}])
 
 		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLoginService', "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
+			$scope.logout = function(option){
+				var clearDatabase,
+					localStores;
 
-			$scope.clearStorage = function(option){
-				var clearDatabase = option,
+				if(option){
+					clearDatabase = option;
 					localStores = noConfig.current.localStores;
+				}
 
 				noLoginService.logout(localStores,clearDatabase);
 
