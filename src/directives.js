@@ -28,7 +28,10 @@
 
 		.directive('noUserMenu',['noLoginService', function(noLogin){
 			return {
-				template: "Welcome {{user.username}}",
+				template: function(){
+					console.log(arguments);
+					//"Welcome {{user.username}}",
+				},
 				controller: ['$scope','$uibModal', function($scope, $uibModal){
 					$scope.user = noLogin.user;
 
