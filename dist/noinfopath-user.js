@@ -3,7 +3,7 @@
 
 /**
  * # noinfopath-user.js
- * @version 1.0.3
+ * @version 1.0.4
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -442,7 +442,10 @@
 
 		.directive('noUserMenu',['noLoginService', function(noLogin){
 			return {
-				template: "Welcome {{user.username}}",
+				template: function(){
+					console.log(arguments);
+					//"Welcome {{user.username}}",
+				},
 				controller: ['$scope','$uibModal', function($scope, $uibModal){
 					$scope.user = noLogin.user;
 
