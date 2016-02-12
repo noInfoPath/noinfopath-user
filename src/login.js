@@ -1,6 +1,4 @@
 //login.js
-
-
 (function(angular, undefined){
 	"use strict";
 
@@ -240,55 +238,55 @@
 		}.bind(this);
 
 		this.login = function login(loginInfo){
-			var deferred = $q.defer();
-				//console.log("loginInfo",loginInfo);
-			noConfig.whenReady()
-				.then(function(){
-					var params = $.param({
-						"grant_type": "password",
-						"password": loginInfo.password,
-						"username": loginInfo.username
-					}),
-					url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
+			return $q(function(resolve, reject){
+				noConfig.whenReady()
+					.then(function(){
+						var params = $.param({
+							"grant_type": "password",
+							"password": loginInfo.password,
+							"username": loginInfo.username
+						}),
+						url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
 
-					//console.log("params",params);
-					$http.post(url, params, {
-						headers: {
-							"Content-Type": "appication/x-www-form-urlencoded"
-						},
-						data: params,
-						withCredentials: true
-					})
-					.then(function(resp){
-						var user = new NoInfoPathUser(resp.data);
+						//console.log("params",params);
+						$http.post(url, params, {
+							headers: {
+								"Content-Type": "appication/x-www-form-urlencoded"
+							},
+							data: params,
+							withCredentials: true
+						})
+							.then(function(resp){
+								var user = new NoInfoPathUser(resp.data);
 
-						noLocalStorage.setItem("noUser", user);
+								noLocalStorage.setItem("noUser", user);
 
-						$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
-						//authService.loginConfirmed(user);
-						$rootScope.noUserAuth = true;
-						$rootScope.failedLoginAttepts = 0;
-						deferred.resolve(user);
-					})
-					.catch(function(err){
-						var msg = "";
-						switch(err.status){
-							case 400:
-								msg = err.data.error_description;
-								$rootScope.failedLoginAttepts++;
-								break;
-							case 0:
-								$rootScope.failedLoginAttepts = -1;
-								msg = "Authentication service is offline.";
-								break;
-						}
+								$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
+								//authService.loginConfirmed(user);
+								$rootScope.noUserAuth = true;
+								$rootScope.user = user;
+								$rootScope.failedLoginAttepts = 0;
+								resolve(user);
+							})
+							.catch(function(err){
+								var msg = "";
+								switch(err.status){
+									case 400:
+										msg = err.data.error_description;
+										$rootScope.failedLoginAttepts++;
+										break;
+									case 0:
+										$rootScope.failedLoginAttepts = -1;
+										msg = "Authentication service is offline.";
+										break;
+								}
 
-						deferred.reject(msg);
+								reject(msg);
+							});
 					});
-				});
 
+			});
 
-			return deferred.promise;
 		};
 
 		this.register = function register(registerInfo){

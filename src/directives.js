@@ -12,7 +12,7 @@
 				};
 
 				$scope.login = function(){
-					log.write($scope.credentials);
+					//log.write($scope.credentials);
 					noLoginService.login($scope.credentials);
 				};
 
@@ -26,27 +26,28 @@
 			return dir;
 		}])
 
-		.directive('noUserMenu',['noLoginService', 'noConfig', function(noLoginService, noConfig){
+		.directive('noUserMenu',[function(){
 			return {
-				template: function(){
-					console.log(arguments);
-					//"Welcome {{user.username}}",
-				},
-				controller: ['$scope','$uibModal', function($scope, $uibModal){
-					$scope.user = noLoginService.user;
+				template: "Welcome {{user.username}}",
+				controller: ["$scope", "$uibModal", "noConfig", "noLoginService",  function($scope, $uibModal, noConfig, noLoginService){
 
-					var localStoresExists = noConfig.current.localStores ? true : false,
-						databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
-						logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
+					noConfig.whenReady("config.json")
+						.then(function(){
+							var localStoresExists = noConfig.current.localStores ? true : false,
+								databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
+								logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
 
-					$scope.logoutModal = function () {
-					    var modalInstance = $uibModal.open({
-					      	animation: true,
-							controller: 'userLogoutController',
-						  	backdrop: 'static',
-					      	template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
-					    });
-					};
+							$scope.logoutModal = function () {
+							    var modalInstance = $uibModal.open({
+							      	animation: true,
+									controller: 'userLogoutController',
+								  	backdrop: 'static',
+							      	template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
+							    });
+							};
+
+						});
+
 				}]
 			};
 		}])

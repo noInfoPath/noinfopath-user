@@ -1,9 +1,7 @@
-
 //globals.js
-
 /**
  * # noinfopath-user.js
- * @version 1.0.4
+ * @version 1.0.6
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -11,7 +9,6 @@
  * experience.
  *
  */
-
 (function(angular, undefined){
 	"use strict";
 
@@ -25,8 +22,6 @@
 })(angular);
 
 //login.js
-
-
 (function(angular, undefined){
 	"use strict";
 
@@ -266,55 +261,55 @@
 		}.bind(this);
 
 		this.login = function login(loginInfo){
-			var deferred = $q.defer();
-				//console.log("loginInfo",loginInfo);
-			noConfig.whenReady()
-				.then(function(){
-					var params = $.param({
-						"grant_type": "password",
-						"password": loginInfo.password,
-						"username": loginInfo.username
-					}),
-					url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
+			return $q(function(resolve, reject){
+				noConfig.whenReady()
+					.then(function(){
+						var params = $.param({
+							"grant_type": "password",
+							"password": loginInfo.password,
+							"username": loginInfo.username
+						}),
+						url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
 
-					//console.log("params",params);
-					$http.post(url, params, {
-						headers: {
-							"Content-Type": "appication/x-www-form-urlencoded"
-						},
-						data: params,
-						withCredentials: true
-					})
-					.then(function(resp){
-						var user = new NoInfoPathUser(resp.data);
+						//console.log("params",params);
+						$http.post(url, params, {
+							headers: {
+								"Content-Type": "appication/x-www-form-urlencoded"
+							},
+							data: params,
+							withCredentials: true
+						})
+							.then(function(resp){
+								var user = new NoInfoPathUser(resp.data);
 
-						noLocalStorage.setItem("noUser", user);
+								noLocalStorage.setItem("noUser", user);
 
-						$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
-						//authService.loginConfirmed(user);
-						$rootScope.noUserAuth = true;
-						$rootScope.failedLoginAttepts = 0;
-						deferred.resolve(user);
-					})
-					.catch(function(err){
-						var msg = "";
-						switch(err.status){
-							case 400:
-								msg = err.data.error_description;
-								$rootScope.failedLoginAttepts++;
-								break;
-							case 0:
-								$rootScope.failedLoginAttepts = -1;
-								msg = "Authentication service is offline.";
-								break;
-						}
+								$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
+								//authService.loginConfirmed(user);
+								$rootScope.noUserAuth = true;
+								$rootScope.user = user;
+								$rootScope.failedLoginAttepts = 0;
+								resolve(user);
+							})
+							.catch(function(err){
+								var msg = "";
+								switch(err.status){
+									case 400:
+										msg = err.data.error_description;
+										$rootScope.failedLoginAttepts++;
+										break;
+									case 0:
+										$rootScope.failedLoginAttepts = -1;
+										msg = "Authentication service is offline.";
+										break;
+								}
 
-						deferred.reject(msg);
+								reject(msg);
+							});
 					});
-				});
 
+			});
 
-			return deferred.promise;
 		};
 
 		this.register = function register(registerInfo){
@@ -428,7 +423,7 @@
 				};
 
 				$scope.login = function(){
-					log.write($scope.credentials);
+					//log.write($scope.credentials);
 					noLoginService.login($scope.credentials);
 				};
 
@@ -442,27 +437,28 @@
 			return dir;
 		}])
 
-		.directive('noUserMenu',['noLoginService', 'noConfig', function(noLoginService, noConfig){
+		.directive('noUserMenu',[function(){
 			return {
-				template: function(){
-					console.log(arguments);
-					//"Welcome {{user.username}}",
-				},
-				controller: ['$scope','$uibModal', function($scope, $uibModal){
-					$scope.user = noLoginService.user;
+				template: "Welcome {{user.username}}",
+				controller: ["$scope", "$uibModal", "noConfig", "noLoginService",  function($scope, $uibModal, noConfig, noLoginService){
 
-					var localStoresExists = noConfig.current.localStores ? true : false,
-						databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
-						logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
+					noConfig.whenReady("config.json")
+						.then(function(){
+							var localStoresExists = noConfig.current.localStores ? true : false,
+								databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
+								logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
 
-					$scope.logoutModal = function () {
-					    var modalInstance = $uibModal.open({
-					      	animation: true,
-							controller: 'userLogoutController',
-						  	backdrop: 'static',
-					      	template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
-					    });
-					};
+							$scope.logoutModal = function () {
+							    var modalInstance = $uibModal.open({
+							      	animation: true,
+									controller: 'userLogoutController',
+								  	backdrop: 'static',
+							      	template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
+							    });
+							};
+
+						});
+
 				}]
 			};
 		}])

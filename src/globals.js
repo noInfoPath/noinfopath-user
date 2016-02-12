@@ -1,9 +1,7 @@
-
 //globals.js
-
 /**
  * # noinfopath-user.js
- * @version 1.0.4
+ * @version 1.0.6
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -11,7 +9,6 @@
  * experience.
  *
  */
-
 (function(angular, undefined){
 	"use strict";
 
