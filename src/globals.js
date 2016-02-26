@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 1.0.7
+ * @version 1.0.8
  *
  *
  * The noinfopath.user module contains services, and directives that assist in

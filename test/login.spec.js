@@ -1,4 +1,4 @@
-var $httpBackend, $timeout, $base64, noLocalStorage, noLoginService, noUrl;
+var $httpBackend, $timeout, $base64, noLocalStorage, noLoginService, noUrl, _, noConfig;
 
 
 describe("Testing noinfopath-user module", function(){
@@ -20,6 +20,8 @@ describe("Testing noinfopath-user module", function(){
 			noLocalStorage = $injector.get('noLocalStorage');
 			noLoginService = $injector.get('noLoginService');
 			noUrl = $injector.get('noUrl');
+			_ = $injector.get("lodash");
+			noConfig = $injector.get("noConfig");
 		});
 	});
 
@@ -106,8 +108,8 @@ describe("Testing noinfopath-user module", function(){
 				expect(angular.equals(actual, expected)).toBeTruthy();
 			});
 
-			xit("noLoginService.isAuthenticated should return true when noLocalStorage.noUser is truthy.", function(){
-				var nou = new noInfoPath.NoInfoPathUser(noLoginServiceMocks.login.noInfoPathUser);
+			it("noLoginService.isAuthenticated should return true when noLocalStorage.noUser is truthy.", function(){
+				var nou = new noInfoPath.NoInfoPathUser(_, noConfig, noLoginServiceMocks.login.noInfoPathUser);
 				noLocalStorage.setItem('noUser', nou);
 				expect(noLoginService.isAuthenticated).toBe(true);
 			});
