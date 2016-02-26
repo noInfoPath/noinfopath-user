@@ -46,14 +46,39 @@
 	 * |tokenExpired|Bool|Returns true if the users bearer token has expired.|
 	 *
 	*/
-	function NoInfoPathUser(data){
-		var tmp;
+	function NoInfoPathUser(lodash, noConfig, data){
+		var _ = lodash,
+			noConfigCurrent = noConfig ? noConfig.current : {},
+			securityObjects = noConfigCurrent ? noConfigCurrent.securityObjects : [],
+			tmp, permissions = {};
+
 		if(angular.isObject(data)){
 			tmp = data;
 		}else{
 			tmp = angular.fromJson(data);
 
 		}
+
+		tmp.acl = angular.fromJson(tmp.acl);
+
+		function findAco(objectId, aco){
+			return aco.securityObjectID.toLowerCase() == objectId.toLowerCase();
+		}
+
+		for(var soi in securityObjects){
+			var so = securityObjects[soi],
+				aco = _.find(tmp.acl, findAco.bind(null,so)),
+				soo;
+
+				if(aco){
+					soo = new NoAccessControl(aco);
+
+					permissions[so] = soo;
+				}
+
+		}
+
+		tmp.permissions = permissions;
 
 		angular.extend(this, tmp);
 		this.expires = new Date(Date.parse(this[".expires"]));
@@ -66,8 +91,29 @@
 				}
 			}
 		});
+
+		this.getPermissions = function(objectId){
+			return this.permissions[objectId];
+		};
+
 	}
 	noInfoPath.NoInfoPathUser = NoInfoPathUser;
+
+	function NoAccessControl(aco){
+
+		Object.defineProperties(this, {
+			canRead : {
+				get : function(){
+					return aco && aco.grant.indexOf("R") > -1;
+				}
+			},
+			canWrite : {
+				get : function(){
+					return aco && aco.grant.indexOf("W") > -1;
+				}
+			}
+		});
+	}
 
 	/*
 	 * ## LoginService : Class
@@ -179,7 +225,7 @@
 	 * |user|NoInfoPathUser|A reference to the currently logged in user.|
 	 *
 	*/
-	function LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope){
+	function LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _){
 		var SELF = this,
 			_user;
 
@@ -204,7 +250,7 @@
 						var u = noLocalStorage.getItem("noUser"),
 							j = angular.toJson(u);
 						if(u){
-							_user = new NoInfoPathUser(j);
+							_user = new NoInfoPathUser(_, noConfig, j);
 						}
 					}
 
@@ -257,7 +303,7 @@
 							withCredentials: true
 						})
 							.then(function(resp){
-								var user = new NoInfoPathUser(resp.data);
+								var user = new NoInfoPathUser(_, noConfig, resp.data);
 
 								noLocalStorage.setItem("noUser", user);
 
@@ -380,8 +426,8 @@
 		}])
 
 
-		.factory('noLoginService',  [ '$q', '$http', '$base64', 'noLocalStorage', 'noUrl', 'noConfig', '$rootScope', function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope){
-			return new LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope);
+		.factory('noLoginService',  [ '$q', '$http', '$base64', 'noLocalStorage', 'noUrl', 'noConfig', '$rootScope', "lodash", function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _){
+			return new LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _);
 		}])
 	;
 })(angular);
