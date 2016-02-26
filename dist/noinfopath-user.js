@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 1.0.6
+ * @version 1.0.7
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -69,14 +69,39 @@
 	 * |tokenExpired|Bool|Returns true if the users bearer token has expired.|
 	 *
 	*/
-	function NoInfoPathUser(data){
-		var tmp;
+	function NoInfoPathUser(lodash, noConfig, data){
+		var _ = lodash,
+			noConfigCurrent = noConfig ? noConfig.current : {},
+			securityObjects = noConfigCurrent ? noConfigCurrent.securityObjects : [],
+			tmp, permissions = {};
+
 		if(angular.isObject(data)){
 			tmp = data;
 		}else{
 			tmp = angular.fromJson(data);
 
 		}
+
+		tmp.acl = angular.fromJson(tmp.acl);
+
+		function findAco(objectId, aco){
+			return aco.securityObjectID.toLowerCase() == objectId.toLowerCase();
+		}
+
+		for(var soi in securityObjects){
+			var so = securityObjects[soi],
+				aco = _.find(tmp.acl, findAco.bind(null,so)),
+				soo;
+
+				if(aco){
+					soo = new NoAccessControl(aco);
+
+					permissions[so] = soo;
+				}
+
+		}
+
+		tmp.permissions = permissions;
 
 		angular.extend(this, tmp);
 		this.expires = new Date(Date.parse(this[".expires"]));
@@ -89,8 +114,29 @@
 				}
 			}
 		});
+
+		this.getPermissions = function(objectId){
+			return this.permissions[objectId];
+		};
+
 	}
 	noInfoPath.NoInfoPathUser = NoInfoPathUser;
+
+	function NoAccessControl(aco){
+
+		Object.defineProperties(this, {
+			canRead : {
+				get : function(){
+					return aco && aco.grant.indexOf("R") > -1;
+				}
+			},
+			canWrite : {
+				get : function(){
+					return aco && aco.grant.indexOf("W") > -1;
+				}
+			}
+		});
+	}
 
 	/*
 	 * ## LoginService : Class
@@ -202,7 +248,7 @@
 	 * |user|NoInfoPathUser|A reference to the currently logged in user.|
 	 *
 	*/
-	function LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope){
+	function LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _){
 		var SELF = this,
 			_user;
 
@@ -227,7 +273,7 @@
 						var u = noLocalStorage.getItem("noUser"),
 							j = angular.toJson(u);
 						if(u){
-							_user = new NoInfoPathUser(j);
+							_user = new NoInfoPathUser(_, noConfig, j);
 						}
 					}
 
@@ -280,7 +326,7 @@
 							withCredentials: true
 						})
 							.then(function(resp){
-								var user = new NoInfoPathUser(resp.data);
+								var user = new NoInfoPathUser(_, noConfig, resp.data);
 
 								noLocalStorage.setItem("noUser", user);
 
@@ -403,8 +449,8 @@
 		}])
 
 
-		.factory('noLoginService',  [ '$q', '$http', '$base64', 'noLocalStorage', 'noUrl', 'noConfig', '$rootScope', function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope){
-			return new LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope);
+		.factory('noLoginService',  [ '$q', '$http', '$base64', 'noLocalStorage', 'noUrl', 'noConfig', '$rootScope', "lodash", function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _){
+			return new LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _);
 		}])
 	;
 })(angular);
@@ -460,6 +506,84 @@
 						});
 
 				}]
+			};
+		}])
+
+		.directive("noSecurity", ["noLoginService", "$state", "noFormConfig", "noConfig", function(noLoginService, $state, noFormConfig, noConfig){
+			function _link(scope, el, attrs){
+				var objectId;
+
+				if(attrs.noSecurity){
+					if(attrs.noSecurity == "entity")
+					{
+						if($state.params.entity){
+							objectId = noConfig.current.securityObjects[$state.params.entity];
+						} else {
+							objectId = noConfig.current.securityObjects[$state.current.name];
+						}
+					} else {
+						objectId = attrs.noSecurity;
+					}
+					var perm = noLoginService.user.getPermissions(objectId);
+
+					if(attrs.grant == "W"){
+						if(perm && perm.canWrite){
+							el.removeClass("ng-hide");
+						} else {
+							el.addClass("ng-hide");
+						}
+					} else {
+						if(perm && perm.canRead){
+							el.removeClass("ng-hide");
+						} else {
+							el.addClass("ng-hide");
+						}
+					}
+				}
+				// } else {
+				// 	noFormConfig.getFormByRoute($state.current.name, $state.params.entity, scope)
+				// 		.then(function(data){
+				// 			if(noLoginService.user.getPermissions(data.security[attrs.noNav])){
+				// 				el.removeClass("ng-hide");
+				// 			} else {
+				// 				el.addClass("ng-hide");
+				// 			}
+				// 		})
+				// 		.catch(function(err) {
+				// 			console.error(err);
+				// 		});
+				// }
+
+			}
+
+			return {
+				restrict: "A",
+				link: _link
+			};
+		}])
+
+		.directive("noSecurityMenu", ["noLoginService", "$state", "noFormConfig", "noConfig", function(noLoginService, $state, noFormConfig, noConfig){
+			function _compile(el, attrs){
+
+				var buttons = el.find("button");
+
+				for (var i = 0; i < buttons.length; i++){
+					var buttonH = buttons[i],
+						buttonA = angular.element(buttonH),
+						matches = buttonH.outerHTML.match(/{[^}]*\}/g),
+						match = matches ? matches[0].replace(/&quot;/g, "\"") : undefined,
+						entityConfig = angular.fromJson(match ? match : {entity: buttonA.attr("ui-sref")}),
+						sid = noConfig.current.securityObjects[entityConfig.entity];
+
+					buttonA.attr("no-security", sid);
+				}
+
+				return angular.noop;
+			}
+
+			return {
+				restrict: "A",
+				compile: _compile
 			};
 		}])
 
