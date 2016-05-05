@@ -1,5 +1,5 @@
 //login.js
-(function(angular, undefined){
+(function(angular, undefined) {
 	"use strict";
 
 	var $httpProviderRef;
@@ -9,7 +9,7 @@
 	 *
 	 * Returns an instance of the `LoginService` class will all dependencies
 	 *	injected.
-	*/
+	 */
 
 	/*
 	 * ## NoInfoPathUser : Class
@@ -45,36 +45,36 @@
 	 * |----|----|-----------|
 	 * |tokenExpired|Bool|Returns true if the users bearer token has expired.|
 	 *
-	*/
-	function NoInfoPathUser(lodash, noConfig, data){
+	 */
+	function NoInfoPathUser(lodash, noConfig, data) {
 		var _ = lodash,
 			noConfigCurrent = noConfig ? noConfig.current : {},
 			securityObjects = noConfigCurrent ? noConfigCurrent.securityObjects : [],
 			tmp, permissions = {};
 
-		if(angular.isObject(data)){
+		if (angular.isObject(data)) {
 			tmp = data;
-		}else{
+		} else {
 			tmp = angular.fromJson(data);
 
 		}
 
 		tmp.acl = angular.fromJson(tmp.acl);
 
-		function findAco(objectId, aco){
+		function findAco(objectId, aco) {
 			return aco.securityObjectID.toLowerCase() == objectId.toLowerCase();
 		}
 
-		for(var soi in securityObjects){
+		for (var soi in securityObjects) {
 			var so = securityObjects[soi],
-				aco = _.find(tmp.acl, findAco.bind(null,so)),
+				aco = _.find(tmp.acl, findAco.bind(null, so)),
 				soo;
 
-				if(aco){
-					soo = new NoAccessControl(aco);
+			if (aco) {
+				soo = new NoAccessControl(aco);
 
-					permissions[so] = soo;
-				}
+				permissions[so] = soo;
+			}
 
 		}
 
@@ -85,30 +85,30 @@
 
 		Object.defineProperties(this, {
 			"tokenExpired": {
-				"get": function(){
+				"get": function() {
 					var n = new Date();
 					return n >= this.expires;
 				}
 			}
 		});
 
-		this.getPermissions = function(objectId){
+		this.getPermissions = function(objectId) {
 			return this.permissions[objectId];
 		};
 
 	}
 	noInfoPath.NoInfoPathUser = NoInfoPathUser;
 
-	function NoAccessControl(aco){
+	function NoAccessControl(aco) {
 
 		Object.defineProperties(this, {
-			canRead : {
-				get : function(){
+			canRead: {
+				get: function() {
 					return aco && aco.grant.indexOf("R") > -1;
 				}
 			},
-			canWrite : {
-				get : function(){
+			canWrite: {
+				get: function() {
 					return aco && aco.grant.indexOf("W") > -1;
 				}
 			}
@@ -224,8 +224,8 @@
 	 * |isAuthorized|Bool|Turns true if the isAuthenticated and the bearer token is valid.|
 	 * |user|NoInfoPathUser|A reference to the currently logged in user.|
 	 *
-	*/
-	function LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _){
+	 */
+	function LoginService($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _) {
 		var SELF = this,
 			_user;
 
@@ -233,7 +233,7 @@
 
 		Object.defineProperties(this, {
 			"isAuthenticated": {
-				"get": function(){
+				"get": function() {
 					return angular.isObject(this.user);
 				}
 			},
@@ -245,11 +245,10 @@
 			"user": {
 				"get": function() {
 					//console.log("user:get ", _user, angular.isUndefined(_user));
-					if(angular.isUndefined(_user))
-					{
+					if (angular.isUndefined(_user)) {
 						var u = noLocalStorage.getItem("noUser"),
 							j = angular.toJson(u);
-						if(u){
+						if (u) {
 							_user = new NoInfoPathUser(_, noConfig, j);
 						}
 					}
@@ -259,23 +258,22 @@
 			}
 		});
 
-		this.whenAuthorized = function(){
-			return $q(function(resolve, reject){
-				if(this.isAuthorized)
-				{
+		this.whenAuthorized = function() {
+			return $q(function(resolve, reject) {
+				if (this.isAuthorized) {
 					$httpProviderRef.defaults.headers.common.Authorization = this.user.token_type + " " + this.user.access_token;
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
 					$rootScope.failedLoginAttepts = 0;
 					resolve(this.user);
-				}else{
+				} else {
 
-					if($rootScope.failedLoginAttepts === -1){
+					if ($rootScope.failedLoginAttepts === -1) {
 						reject("authServiceOffline");
-					}else{
-						if($rootScope.failedLoginAttepts > 3){
+					} else {
+						if ($rootScope.failedLoginAttepts > 3) {
 							reject("tooManyFailedLogons");
-						}else{
+						} else {
 							reject("login");
 						}
 					}
@@ -283,151 +281,152 @@
 			}.bind(this));
 		}.bind(this);
 
-		this.login = function login(loginInfo){
-			return $q(function(resolve, reject){
-				noConfig.whenReady()
-					.then(function(){
-						var params = $.param({
-							"grant_type": "password",
-							"password": loginInfo.password,
-							"username": loginInfo.username
-						}),
-						url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token");
+		this.login = function login(loginInfo) {
+			var deferred = $q.defer(),
+				url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token"),
+				method = "POST",
+				data = {
+					"grant_type": "password",
+					"password": loginInfo.password,
+					"username": loginInfo.username
+				};
 
-						//console.log("params",params);
-						$http.post(url, params, {
-							headers: {
-								"Content-Type": "appication/x-www-form-urlencoded"
-							},
-							data: params,
-							withCredentials: true
-						})
-							.then(function(resp){
-								var user = new NoInfoPathUser(_, noConfig, resp.data);
+			noHTTP.noRequestForm(url, method, data)
+				.then(function(resp) {
+					var user = new NoInfoPathUser(_, noConfig, resp);
 
-								noLocalStorage.setItem("noUser", user);
+					noLocalStorage.setItem("noUser", user);
 
-								$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
-								//authService.loginConfirmed(user);
-								$rootScope.noUserAuth = true;
-								$rootScope.user = user;
-								$rootScope.failedLoginAttepts = 0;
-								resolve(user);
-							})
-							.catch(function(err){
-								var msg = "";
-								switch(err.status){
-									case 400:
-										msg = err.data.error_description;
-										$rootScope.failedLoginAttepts++;
-										break;
-									case 0:
-										$rootScope.failedLoginAttepts = -1;
-										msg = "Authentication service is offline.";
-										break;
-								}
+					$rootScope.noUserAuth = true;
+					$rootScope.user = user;
+					$rootScope.failedLoginAttepts = 0;
 
-								reject(msg);
-							});
-					});
+					deferred.resolve(user);
+				})
+				.catch(function(err) {
+					var msg = "";
+					switch (err.status) {
+						case 400:
+							msg = err.data.error_description;
+							$rootScope.failedLoginAttepts++;
+							break;
+						case 0:
+							$rootScope.failedLoginAttepts = -1;
+							msg = "Authentication service is offline.";
+							break;
+					}
 
-			});
-
-		};
-
-		this.register = function register(registerInfo){
-			var deferred = $q.defer();
-
-			noConfig.whenReady()
-				.then(function(){
-					var params = $.param({
-						"Email": registerInfo.email,
-						"Password": registerInfo.password,
-						"ConfirmPassword": registerInfo.confirmPassword
-					}),
-					url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/register");
-
-					$http.post(url, params, {
-						headers: {
-							"Content-Type": "application/x-www-form-urlencoded"
-						},
-						data: params,
-						withCredentials: true
-					})
-					.then(function(resp){
-
-						//console.log("registration complete",a,b,c,d,e);
-
-						//$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
-						deferred.resolve(resp);
-					})
-					.catch(deferred.reject);
+					deferred.reject(msg);
 				});
+
 			return deferred.promise;
 		};
 
-		this.changePassword = function changePassword(updatePasswordInfo){
-			var deferred = $q.defer();
+		this.register = function register(registerInfo) {
+			var deferred = $q.defer(),
+				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/register"),
+				method = "POST",
+				data = {
+					"Email": registerInfo.email,
+					"Password": registerInfo.password,
+					"ConfirmPassword": registerInfo.confirmPassword
+				};
 
-			noConfig.whenReady()
-				.then(function(){
-					var params = $.param({
-						"OldPassword": updatePasswordInfo.OldPassword,
-						"NewPassword": updatePasswordInfo.NewPassword,
-						"ConfirmPassword": updatePasswordInfo.ConfirmPassword
-					}),
-					url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/changepassword");
+			noHTTP.noRequestJSON(url, method, data)
+				.then(function(resp) {
+					deferred.resolve(resp);
+				})
+				.catch(deferred.reject);
 
-					$http.post(url, params, {
-						headers: {
-							"Content-Type": "application/x-www-form-urlencoded"
-						},
-						data: params,
-						withCredentials: true
-					})
-					.then(function(resp){
-
-						//console.log("Password Updated",a,b,c,d,e);
-
-						//$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
-						deferred.resolve(resp);
-					})
-					.catch(deferred.reject);
-				});
 			return deferred.promise;
 		};
 
-		this.logout = function logout(stores, cleardb){
+		this.changePassword = function changePassword(updatePasswordInfo) {
+			var deferred = $q.defer(),
+				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/changepassword"),
+				method = "POST",
+				data = {
+					"UserID": updatePasswordInfo.UserID,
+					"OldPassword": updatePasswordInfo.OldPassword,
+					"NewPassword": updatePasswordInfo.NewPassword,
+					"ConfirmPassword": updatePasswordInfo.ConfirmPassword
+				};
+
+			noHTTP.noRequestJSON(url, method, data)
+				.then(function(resp) {
+					deferred.resolve(resp);
+				})
+				.catch(deferred.reject);
+
+			return deferred.promise;
+		};
+
+		this.setPassword = function(setPasswordInfo) {
+			var deferred = $q.defer(),
+				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/setpassword"),
+				method = "POST",
+				data = {
+					"UserID": setPasswordInfo.UserID,
+					"NewPassword": setPasswordInfo.NewPassword,
+					"ConfirmPassword": setPasswordInfo.ConfirmPassword
+				};
+
+			noHTTP.noRequestJSON(url, method, data)
+				.then(function(resp) {
+					deferred.resolve(resp);
+				})
+				.catch(deferred.reject);
+
+			return deferred.promise;
+		};
+
+		this.updatePermissions = function(updatePermissionInfo) {
+			var deferred = $q.defer(),
+				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/updatepermissions"),
+				method = "POST",
+				data = updatePermissionInfo;
+
+			noHTTP.noRequestJSON(url, method, data)
+				.then(function(resp) {
+					deferred.resolve(resp);
+				})
+				.catch(function(err) {
+					deferred.reject(err);
+				});
+
+			return deferred.promise;
+		};
+
+		this.logout = function logout(stores, cleardb) {
 			_user = "";
 			noLocalStorage.removeItem("noUser");
 
-			if(stores && stores.nonDBStores){
-				for(var s in stores.nonDBStores){
+			if (stores && stores.nonDBStores) {
+				for (var s in stores.nonDBStores) {
 					noLocalStorage.removeItem(stores.nonDBStores[s]);
 				}
 			}
 
-			if(cleardb && (stores.dbStores.clearDB === true)){
-				for(var d in stores.dbStores.stores){
+			if (cleardb && (stores.dbStores.clearDB === true)) {
+				for (var d in stores.dbStores.stores) {
 					noLocalStorage.removeItem(stores.dbStores.stores[d]);
 				}
 			}
 		};
 
-		$rootScope.$on("event:auth-loginRequired", function(){
+		$rootScope.$on("event:auth-loginRequired", function() {
 			$rootScope.$broadcast("noLoginService::loginRequired");
 		});
 	}
 
-	angular.module('noinfopath.user')
+	angular.module("noinfopath.user")
 
-		.config(['$httpProvider',function($httpProvider){
-			$httpProviderRef  = $httpProvider;
-		}])
+	.config(["$httpProvider", function($httpProvider) {
+		$httpProviderRef = $httpProvider;
+	}])
 
 
-		.factory('noLoginService',  [ '$q', '$http', '$base64', 'noLocalStorage', 'noUrl', 'noConfig', '$rootScope', "lodash", function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _){
-			return new LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _);
-		}])
-	;
+	.factory("noLoginService", ["$q", "noHTTP", "$base64", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _) {
+		return new LoginService($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _);
+	}]);
 })(angular);
