@@ -180,7 +180,7 @@
 								group.append(label);
 								el.append(group);
 
-								scope.noReset_permissions = checkedItems;
+								scope.noReset_permission = checkedItems;
 							}
 
 							deferred.resolve();
