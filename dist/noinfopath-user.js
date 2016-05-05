@@ -632,6 +632,11 @@
 									checkedItems.push(value.GroupID);
 								}
 
+								if(value.GroupName === "Administrator" && noLoginService.user.userId === $state.params.id)
+								{
+									chbox[0].disabled = true;
+								}
+
 								label.prepend(chbox);
 								group.append(label);
 								el.append(group);
