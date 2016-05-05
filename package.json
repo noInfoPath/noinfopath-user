@@ -1,6 +1,6 @@
 {
   "name": "@noinfopath/noinfopath-user",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "noInfoPath user module",
   "main": "noinfopath-user.js",
   "directories": {
@@ -44,7 +44,7 @@
     "karma-verbose-reporter": "0.0.1",
     "noinfopath-helpers": "0.0.16",
     "phantomjs": "^1.9.15",
-    "ui-router": "0.2.15"
+    "angular-ui-router": "0.2.13"
   },
   "dependencies": {
     "angular": "1.4.8",

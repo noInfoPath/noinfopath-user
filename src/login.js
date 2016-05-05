@@ -372,6 +372,7 @@
 			noConfig.whenReady()
 				.then(function(){
 					var params = $.param({
+						"UserID": updatePasswordInfo.UserID,
 						"OldPassword": updatePasswordInfo.OldPassword,
 						"NewPassword": updatePasswordInfo.NewPassword,
 						"ConfirmPassword": updatePasswordInfo.ConfirmPassword
@@ -386,14 +387,38 @@
 						withCredentials: true
 					})
 					.then(function(resp){
-
-						//console.log("Password Updated",a,b,c,d,e);
-
-						//$httpProviderRef.defaults.headers.common.Authorization = user.token_type + " " + user.access_token;
 						deferred.resolve(resp);
 					})
 					.catch(deferred.reject);
 				});
+			return deferred.promise;
+		};
+
+		this.setPassword = function(setPasswordInfo){
+			var deferred = $q.defer();
+
+			noConfig.whenReady()
+				.then(function(){
+					var params = $.param({
+						"UserID": updatePasswordInfo.UserID,
+						"NewPassword": updatePasswordInfo.NewPassword,
+						"ConfirmPassword": updatePasswordInfo.ConfirmPassword
+					}),
+					url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/setpassword");
+
+					$http.post(url, params, {
+						headers: {
+							"Content-Type": "application/x-www-form-urlencoded"
+						},
+						data: params,
+						withCredentials: true
+					})
+					.then(function(resp){
+						deferred.resolve(resp);
+					})
+					.catch(deferred.reject);
+				});
+
 			return deferred.promise;
 		};
 
@@ -419,14 +444,14 @@
 		});
 	}
 
-	angular.module('noinfopath.user')
+	angular.module("noinfopath.user")
 
-		.config(['$httpProvider',function($httpProvider){
+		.config(["$httpProvider",function($httpProvider){
 			$httpProviderRef  = $httpProvider;
 		}])
 
 
-		.factory('noLoginService',  [ '$q', '$http', '$base64', 'noLocalStorage', 'noUrl', 'noConfig', '$rootScope', "lodash", function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _){
+		.factory("noLoginService",  [ "$q", "$http", "$base64", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _){
 			return new LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope, _);
 		}])
 	;

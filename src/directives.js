@@ -2,10 +2,10 @@
 (function(angular, undefined){
 	"use strict";
 
-	angular.module('noinfopath.user')
+	angular.module("noinfopath.user")
 
-		.directive('noLogin', [function(){
-			var noLoginController = ['$scope', 'noLoginService', function($scope, noLoginService){
+		.directive("noLogin", [function(){
+			var noLoginController = ["$scope", "noLoginService", function($scope, noLoginService){
 				$scope.credentials = {
 					username: null,
 					password: null
@@ -26,7 +26,7 @@
 			return dir;
 		}])
 
-		.directive('noUserMenu',[function(){
+		.directive("noUserMenu",[function(){
 			return {
 				template: "Welcome {{user.username}}",
 				controller: ["$scope", "$uibModal", "noConfig", "noLoginService",  function($scope, $uibModal, noConfig, noLoginService){
@@ -40,8 +40,8 @@
 							$scope.logoutModal = function () {
 							    var modalInstance = $uibModal.open({
 							      	animation: true,
-									controller: 'userLogoutController',
-								  	backdrop: 'static',
+									controller: "userLogoutController",
+								  	backdrop: "static",
 							      	template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
 							    });
 							};
@@ -130,7 +130,82 @@
 			};
 		}])
 
-		.controller('userLogoutController',['$scope', '$uibModalInstance', 'noLoginService', "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
+		.directive("noUserGroups", ["$q", "$http", "noConfig", "$state", "noUrl", "noLoginService", "lodash", function($q, $http, noConfig, $state, noUrl, noLoginService, _){
+			function _link(scope, el, attrs){
+				var deferred = $q.defer(),
+					user = $state.params.id,
+					groupListURL = noUrl.makeResourceUrl(noConfig.current.NOREST, "odata/NoInfoPath_Groups"),
+					memberGroupURL = noUrl.makeResourceUrl(noConfig.current.NOREST, "odata/NoInfoPath_Users(guid'" + user + "')/NoInfoPath_Groups"),
+					groups;
+
+				$http.get(groupListURL, {}, {
+					headers: {
+						"Authorization": noLoginService.user.token_type + " " + noLoginService.user.access_token
+					},
+					data: {},
+					withCredentials: true
+				})
+				.then(function(resp){
+					if(resp.data && resp.data.value && resp.data.value.length > 0){
+						var groups = _.sortBy(resp.data.value, "GroupName");
+
+						$http.get(memberGroupURL, {}, {
+							headers: {
+								"Authorization": noLoginService.user.token_type + " " + noLoginService.user.access_token
+							},
+							data: {},
+							withCredentials: true
+						})
+						.then(function(resp2){
+							var checkedItems = [];
+
+							for(var i = 0; i < groups.length; i++){
+								var value = groups[i],
+									group = angular.element("<div></div>"),
+									label = angular.element("<label></label>"),
+									chbox = angular.element("<input type='checkbox'/>");
+
+								group.addClass("checkbox");
+
+								label.text(value.GroupName + " (" + value.GroupCode + ")");
+
+								chbox[0].value = value.GroupID;
+
+								if(_.find(resp2.data.value, {"GroupName": value.GroupName})){
+									chbox[0].checked = true;
+									checkedItems.push(value.GroupID);
+								}
+
+								label.prepend(chbox);
+								group.append(label);
+								el.append(group);
+
+								scope.noReset_permissions = checkedItems;
+							}
+
+							deferred.resolve();
+						})
+						.catch(deferred.reject);
+					}
+				})
+				.catch(deferred.reject);
+
+				// $http.get(url, "odata/NoInfoPath_Users(" + user + ")/NoInfoPath_Groups")
+				// 	.then(function(data){
+				//
+				// 	})
+				// 	.catch(deferred.reject);
+
+				return deferred;
+			}
+
+			return {
+				restrict: "E",
+				link: _link
+			};
+		}])
+
+		.controller("userLogoutController",["$scope", "$uibModalInstance", "noLoginService", "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
 			$scope.logout = function(option){
 				var clearDatabase,
 					localStores;
@@ -146,7 +221,7 @@
 			};
 
 			$scope.close = function () {
-				$uibModalInstance.dismiss('cancel');
+				$uibModalInstance.dismiss("cancel");
 			};
 		}])
 	;
