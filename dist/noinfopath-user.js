@@ -9,10 +9,10 @@
  * experience.
  *
  */
-(function(angular, undefined){
+(function (angular, undefined) {
 	"use strict";
 
-	angular.module('noinfopath.user',[
+	angular.module('noinfopath.user', [
 		'base64',
 		/*'http-auth-interceptor',*/
 		'noinfopath.data',
@@ -22,7 +22,7 @@
 })(angular);
 
 //login.js
-(function(angular, undefined) {
+(function (angular, undefined) {
 	"use strict";
 
 	var $httpProviderRef;
@@ -75,7 +75,7 @@
 			securityObjects = noConfigCurrent ? noConfigCurrent.securityObjects : [],
 			tmp, permissions = {};
 
-		if (angular.isObject(data)) {
+		if(angular.isObject(data)) {
 			tmp = data;
 		} else {
 			tmp = angular.fromJson(data);
@@ -88,12 +88,12 @@
 			return aco.securityObjectID.toLowerCase() == objectId.toLowerCase();
 		}
 
-		for (var soi in securityObjects) {
+		for(var soi in securityObjects) {
 			var so = securityObjects[soi],
 				aco = _.find(tmp.acl, findAco.bind(null, so)),
 				soo;
 
-			if (aco) {
+			if(aco) {
 				soo = new NoAccessControl(aco);
 
 				permissions[so] = soo;
@@ -108,14 +108,14 @@
 
 		Object.defineProperties(this, {
 			"tokenExpired": {
-				"get": function() {
+				"get": function () {
 					var n = new Date();
 					return n >= this.expires;
 				}
 			}
 		});
 
-		this.getPermissions = function(objectId) {
+		this.getPermissions = function (objectId) {
 			return this.permissions[objectId];
 		};
 
@@ -126,12 +126,12 @@
 
 		Object.defineProperties(this, {
 			canRead: {
-				get: function() {
+				get: function () {
 					return aco && aco.grant.indexOf("R") > -1;
 				}
 			},
 			canWrite: {
-				get: function() {
+				get: function () {
 					return aco && aco.grant.indexOf("W") > -1;
 				}
 			}
@@ -256,22 +256,22 @@
 
 		Object.defineProperties(this, {
 			"isAuthenticated": {
-				"get": function() {
+				"get": function () {
 					return angular.isObject(this.user);
 				}
 			},
 			"isAuthorized": {
-				"get": function() {
+				"get": function () {
 					return angular.isObject(this.user) && !this.user.tokenExpired;
 				}
 			},
 			"user": {
-				"get": function() {
+				"get": function () {
 					//console.log("user:get ", _user, angular.isUndefined(_user));
-					if (angular.isUndefined(_user)) {
+					if(angular.isUndefined(_user)) {
 						var u = noLocalStorage.getItem("noUser"),
 							j = angular.toJson(u);
-						if (u) {
+						if(u) {
 							_user = new NoInfoPathUser(_, noConfig, j);
 						}
 					}
@@ -281,9 +281,9 @@
 			}
 		});
 
-		this.whenAuthorized = function() {
-			return $q(function(resolve, reject) {
-				if (this.isAuthorized) {
+		this.whenAuthorized = function () {
+			return $q(function (resolve, reject) {
+				if(this.isAuthorized) {
 					$httpProviderRef.defaults.headers.common.Authorization = this.user.token_type + " " + this.user.access_token;
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
@@ -291,10 +291,10 @@
 					resolve(this.user);
 				} else {
 
-					if ($rootScope.failedLoginAttepts === -1) {
+					if($rootScope.failedLoginAttepts === -1) {
 						reject("authServiceOffline");
 					} else {
-						if ($rootScope.failedLoginAttepts > 3) {
+						if($rootScope.failedLoginAttepts > 3) {
 							reject("tooManyFailedLogons");
 						} else {
 							reject("login");
@@ -315,7 +315,7 @@
 				};
 
 			noHTTP.noRequestForm(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					var user = new NoInfoPathUser(_, noConfig, resp);
 
 					noLocalStorage.setItem("noUser", user);
@@ -326,9 +326,9 @@
 
 					deferred.resolve(user);
 				})
-				.catch(function(err) {
+				.catch(function (err) {
 					var msg = "";
-					switch (err.status) {
+					switch(err.status) {
 						case 400:
 							msg = err.data.error_description;
 							$rootScope.failedLoginAttepts++;
@@ -356,7 +356,7 @@
 				};
 
 			noHTTP.noRequestJSON(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					deferred.resolve(resp);
 				})
 				.catch(deferred.reject);
@@ -376,7 +376,7 @@
 				};
 
 			noHTTP.noRequestJSON(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					deferred.resolve(resp);
 				})
 				.catch(deferred.reject);
@@ -384,7 +384,7 @@
 			return deferred.promise;
 		};
 
-		this.setPassword = function(setPasswordInfo) {
+		this.setPassword = function (setPasswordInfo) {
 			var deferred = $q.defer(),
 				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/setpassword"),
 				method = "POST",
@@ -395,7 +395,7 @@
 				};
 
 			noHTTP.noRequestJSON(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					deferred.resolve(resp);
 				})
 				.catch(deferred.reject);
@@ -403,17 +403,17 @@
 			return deferred.promise;
 		};
 
-		this.updatePermissions = function(updatePermissionInfo) {
+		this.updatePermissions = function (updatePermissionInfo) {
 			var deferred = $q.defer(),
 				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/updatepermissions"),
 				method = "POST",
 				data = updatePermissionInfo;
 
 			noHTTP.noRequestJSON(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					deferred.resolve(resp);
 				})
-				.catch(function(err) {
+				.catch(function (err) {
 					deferred.reject(err);
 				});
 
@@ -424,190 +424,190 @@
 			_user = "";
 			noLocalStorage.removeItem("noUser");
 
-			if (stores && stores.nonDBStores) {
-				for (var s in stores.nonDBStores) {
+			if(stores && stores.nonDBStores) {
+				for(var s in stores.nonDBStores) {
 					noLocalStorage.removeItem(stores.nonDBStores[s]);
 				}
 			}
 
-			if (cleardb && (stores.dbStores.clearDB === true)) {
-				for (var d in stores.dbStores.stores) {
+			if(cleardb && (stores.dbStores.clearDB === true)) {
+				for(var d in stores.dbStores.stores) {
 					noLocalStorage.removeItem(stores.dbStores.stores[d]);
 				}
 			}
 		};
 
-		$rootScope.$on("event:auth-loginRequired", function() {
+		$rootScope.$on("event:auth-loginRequired", function () {
 			$rootScope.$broadcast("noLoginService::loginRequired");
 		});
 	}
 
 	angular.module("noinfopath.user")
 
-	.config(["$httpProvider", function($httpProvider) {
+	.config(["$httpProvider", function ($httpProvider) {
 		$httpProviderRef = $httpProvider;
 	}])
 
 
-	.factory("noLoginService", ["$q", "noHTTP", "$base64", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _) {
+	.factory("noLoginService", ["$q", "noHTTP", "$base64", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _) {
 		return new LoginService($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _);
 	}]);
 })(angular);
 
 //directives.js
-(function(angular, undefined){
+(function (angular, undefined) {
 	"use strict";
 
 	angular.module("noinfopath.user")
 
-		.directive("noLogin", [function(){
-			var noLoginController = ["$scope", "noLoginService", function($scope, noLoginService){
-				$scope.credentials = {
-					username: null,
-					password: null
-				};
+	.directive("noLogin", [function () {
+		var noLoginController = ["$scope", "noLoginService", function ($scope, noLoginService) {
+			$scope.credentials = {
+				username: null,
+				password: null
+			};
 
-				$scope.login = function(){
-					//log.write($scope.credentials);
-					noLoginService.login($scope.credentials);
-				};
+			$scope.login = function () {
+				//log.write($scope.credentials);
+				noLoginService.login($scope.credentials);
+			};
 
 			}];
 
-			var dir = {
-				require: "A",
-				link: noLoginController
-			};
+		var dir = {
+			require: "A",
+			link: noLoginController
+		};
 
-			return dir;
+		return dir;
 		}])
 
-		.directive("noUserMenu",[function(){
-			return {
-				template: "Welcome {{user.username}}",
-				controller: ["$scope", "$uibModal", "noConfig", "noLoginService",  function($scope, $uibModal, noConfig, noLoginService){
+	.directive("noUserMenu", [function () {
+		return {
+			template: "Welcome {{user.username}}",
+			controller: ["$scope", "$uibModal", "noConfig", "noLoginService", function ($scope, $uibModal, noConfig, noLoginService) {
 
-					noConfig.whenReady("config.json")
-						.then(function(){
-							var localStoresExists = noConfig.current.localStores ? true : false,
-								databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
-								logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
+				noConfig.whenReady("config.json")
+					.then(function () {
+						var localStoresExists = noConfig.current.localStores ? true : false,
+							databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
+							logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
 
-							$scope.logoutModal = function () {
-							    var modalInstance = $uibModal.open({
-							      	animation: true,
-									controller: "userLogoutController",
-								  	backdrop: "static",
-							      	template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
-							    });
-							};
+						$scope.logoutModal = function () {
+							var modalInstance = $uibModal.open({
+								animation: true,
+								controller: "userLogoutController",
+								backdrop: "static",
+								template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
+							});
+						};
 
-						});
+					});
 
 				}]
-			};
+		};
 		}])
 
-		.directive("noUserGroups", ["$q", "$http", "noConfig", "$state", "noUrl", "noLoginService", "lodash", function($q, $http, noConfig, $state, noUrl, noLoginService, _){
-			function _link(scope, el, attrs){
-				var deferred = $q.defer(),
-					user = $state.params.id,
-					groupListURL = noUrl.makeResourceUrl(noConfig.current.NOREST, "odata/NoInfoPath_Groups"),
-					memberGroupURL = noUrl.makeResourceUrl(noConfig.current.NOREST, "odata/NoInfoPath_Users(guid'" + user + "')/NoInfoPath_Groups"),
-					groups;
+	.directive("noUserGroups", ["$q", "$http", "noConfig", "$state", "noUrl", "noLoginService", "lodash", function ($q, $http, noConfig, $state, noUrl, noLoginService, _) {
+		function _link(scope, el, attrs) {
+			var deferred = $q.defer(),
+				user = $state.params.id,
+				groupListURL = noUrl.makeResourceUrl(noConfig.current.NOREST, "odata/NoInfoPath_Groups"),
+				memberGroupURL = noUrl.makeResourceUrl(noConfig.current.NOREST, "odata/NoInfoPath_Users(guid'" + user + "')/NoInfoPath_Groups"),
+				groups;
 
-				$http.get(groupListURL, {}, {
+			$http.get(groupListURL, {}, {
 					headers: {
 						"Authorization": noLoginService.user.token_type + " " + noLoginService.user.access_token
 					},
 					data: {},
 					withCredentials: true
 				})
-				.then(function(resp){
-					if(resp.data && resp.data.value && resp.data.value.length > 0){
+				.then(function (resp) {
+					if(resp.data && resp.data.value && resp.data.value.length > 0) {
 						var groups = _.sortBy(resp.data.value, "GroupName");
 
 						$http.get(memberGroupURL, {}, {
-							headers: {
-								"Authorization": noLoginService.user.token_type + " " + noLoginService.user.access_token
-							},
-							data: {},
-							withCredentials: true
-						})
-						.then(function(resp2){
-							var checkedItems = [];
+								headers: {
+									"Authorization": noLoginService.user.token_type + " " + noLoginService.user.access_token
+								},
+								data: {},
+								withCredentials: true
+							})
+							.then(function (resp2) {
+								var checkedItems = [];
 
-							for(var i = 0; i < groups.length; i++){
-								var value = groups[i],
-									group = angular.element("<div></div>"),
-									label = angular.element("<label></label>"),
-									chbox = angular.element("<input type='checkbox'/>");
+								for(var i = 0; i < groups.length; i++) {
+									var value = groups[i],
+										group = angular.element("<div></div>"),
+										label = angular.element("<label></label>"),
+										chbox = angular.element("<input type='checkbox'/>");
 
-								group.addClass("checkbox");
+									group.addClass("checkbox");
 
-								label.text(value.GroupName + " (" + value.GroupCode + ")");
+									label.text(value.GroupName + " (" + value.GroupCode + ")");
 
-								chbox[0].value = value.GroupID;
+									chbox[0].value = value.GroupID;
 
-								if(_.find(resp2.data.value, {"GroupName": value.GroupName})){
-									chbox[0].checked = true;
-									checkedItems.push(value.GroupID);
+									if(_.find(resp2.data.value, {
+											"GroupName": value.GroupName
+										})) {
+										chbox[0].checked = true;
+										checkedItems.push(value.GroupID);
+									}
+
+									if(value.GroupName === "Administrator" && noLoginService.user.userId === $state.params.id) {
+										chbox[0].disabled = true;
+									}
+
+									label.prepend(chbox);
+									group.append(label);
+									el.append(group);
+
+									scope.noReset_permission = checkedItems;
 								}
 
-								if(value.GroupName === "Administrator" && noLoginService.user.userId === $state.params.id)
-								{
-									chbox[0].disabled = true;
-								}
-
-								label.prepend(chbox);
-								group.append(label);
-								el.append(group);
-
-								scope.noReset_permission = checkedItems;
-							}
-
-							deferred.resolve();
-						})
-						.catch(deferred.reject);
+								deferred.resolve();
+							})
+							.catch(deferred.reject);
 					}
 				})
 				.catch(deferred.reject);
 
-				// $http.get(url, "odata/NoInfoPath_Users(" + user + ")/NoInfoPath_Groups")
-				// 	.then(function(data){
-				//
-				// 	})
-				// 	.catch(deferred.reject);
+			// $http.get(url, "odata/NoInfoPath_Users(" + user + ")/NoInfoPath_Groups")
+			// 	.then(function(data){
+			//
+			// 	})
+			// 	.catch(deferred.reject);
 
-				return deferred;
+			return deferred;
+		}
+
+		return {
+			restrict: "E",
+			link: _link
+		};
+		}])
+
+	.controller("userLogoutController", ["$scope", "$uibModalInstance", "noLoginService", "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
+		$scope.logout = function (option) {
+			var clearDatabase,
+				localStores;
+
+			if(option) {
+				clearDatabase = option;
+				localStores = noConfig.current.localStores;
 			}
 
-			return {
-				restrict: "E",
-				link: _link
-			};
-		}])
+			noLoginService.logout(localStores, clearDatabase);
 
-		.controller("userLogoutController",["$scope", "$uibModalInstance", "noLoginService", "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
-			$scope.logout = function(option){
-				var clearDatabase,
-					localStores;
+			location.href = "/";
+		};
 
-				if(option){
-					clearDatabase = option;
-					localStores = noConfig.current.localStores;
-				}
-
-				noLoginService.logout(localStores,clearDatabase);
-
-				location.href = "/";
-			};
-
-			$scope.close = function () {
-				$uibModalInstance.dismiss("cancel");
-			};
-		}])
-	;
+		$scope.close = function () {
+			$uibModalInstance.dismiss("cancel");
+		};
+		}]);
 })(angular);
 
 //security.js
@@ -616,86 +616,85 @@
 
 	angular.module("noinfopath.user")
 
-		.directive("noSecurity", ["noLoginService", "$state", "noFormConfig", "noConfig", "noSecurity", function (noLoginService, $state, noFormConfig, noConfig, noSecurity) {
-			function _link(scope, el, attrs) {
-				var perm, scopeVal;
+	.directive("noSecurity", ["noLoginService", "$state", "noFormConfig", "noConfig", "noSecurity", function (noLoginService, $state, noFormConfig, noConfig, noSecurity) {
+		function _link(scope, el, attrs) {
+			var perm, scopeVal;
 
-				perm = noSecurity.getPermissions(attrs.noSecurity);
+			perm = noSecurity.getPermissions(attrs.noSecurity);
 
-				if(attrs.grant === "W") {
-					if(perm && perm.canWrite) {
-						el.removeClass("ng-hide");
-					} else {
-						el.addClass("ng-hide");
-					}
+			if(attrs.grant === "W") {
+				if(perm && perm.canWrite) {
+					el.removeClass("ng-hide");
 				} else {
-					if(perm && perm.canRead) {
-						el.removeClass("ng-hide");
-					} else {
-						el.addClass("ng-hide");
-					}
+					el.addClass("ng-hide");
 				}
-
-			}
-
-			function _compile(el, attrs) {
-				if(attrs.ngShow) {
-					el.attr("ng-show", null);
-				}
-
-				return _link;
-			}
-
-			return {
-				restrict: "A",
-				compile: _compile
-			};
-		}])
-
-		.directive("noSecurityMenu", ["noLoginService", "$state", "noFormConfig", "noConfig", function (noLoginService, $state, noFormConfig, noConfig) {
-			function _compile(el, attrs) {
-
-				var buttons = el.find("button");
-
-				for(var i = 0; i < buttons.length; i++) {
-					var buttonH = buttons[i],
-						buttonA = angular.element(buttonH),
-						matches = buttonH.outerHTML.match(/{[^}]*\}/g),
-						match = matches ? matches[0].replace(/&quot;/g, "\"") : undefined,
-						entityConfig = angular.fromJson(match ? match : {
-							entity: buttonA.attr("ui-sref")
-						}),
-						sid = noConfig.current.securityObjects[entityConfig.entity];
-
-					buttonA.attr("no-security", sid);
-				}
-
-				return angular.noop;
-			}
-
-			return {
-				restrict: "A",
-				compile: _compile
-			};
-		}])
-
-		.service("noSecurity", ["noLoginService", "$state", "noFormConfig", "noConfig", function (noLoginService, $state, noFormConfig, noConfig) {
-			this.getPermissions = function (securityObject) {
-				var objectId;
-
-				if(securityObject === "entity") {
-					if($state.params.entity) {
-						objectId = noConfig.current.securityObjects[$state.params.entity];
-					} else {
-						objectId = noConfig.current.securityObjects[$state.current.name];
-					}
+			} else {
+				if(perm && perm.canRead) {
+					el.removeClass("ng-hide");
 				} else {
-					objectId = securityObject;
+					el.addClass("ng-hide");
 				}
-				var perm = noLoginService.user.getPermissions(objectId);
+			}
 
-				return perm; //returns undefined or an object
-			};
+		}
+
+		function _compile(el, attrs) {
+			if(attrs.ngShow) {
+				el.attr("ng-show", null);
+			}
+
+			return _link;
+		}
+
+		return {
+			restrict: "A",
+			compile: _compile
+		};
 		}])
-	;
+
+	.directive("noSecurityMenu", ["noLoginService", "$state", "noFormConfig", "noConfig", function (noLoginService, $state, noFormConfig, noConfig) {
+		function _compile(el, attrs) {
+
+			var buttons = el.find("button");
+
+			for(var i = 0; i < buttons.length; i++) {
+				var buttonH = buttons[i],
+					buttonA = angular.element(buttonH),
+					matches = buttonH.outerHTML.match(/{[^}]*\}/g),
+					match = matches ? matches[0].replace(/&quot;/g, "\"") : undefined,
+					entityConfig = angular.fromJson(match ? match : {
+						entity: buttonA.attr("ui-sref")
+					}),
+					sid = noConfig.current.securityObjects[entityConfig.entity];
+
+				buttonA.attr("no-security", sid);
+			}
+
+			return angular.noop;
+		}
+
+		return {
+			restrict: "A",
+			compile: _compile
+		};
+		}])
+
+	.service("noSecurity", ["noLoginService", "$state", "noFormConfig", "noConfig", function (noLoginService, $state, noFormConfig, noConfig) {
+		this.getPermissions = function (securityObject) {
+			var objectId;
+
+			if(securityObject === "entity") {
+				if($state.params.entity) {
+					objectId = noConfig.current.securityObjects[$state.params.entity];
+				} else {
+					objectId = noConfig.current.securityObjects[$state.current.name];
+				}
+			} else {
+				objectId = securityObject;
+			}
+			var perm = noLoginService.user.getPermissions(objectId);
+
+			return perm; //returns undefined or an object
+		};
+		}]);
 })(angular);
