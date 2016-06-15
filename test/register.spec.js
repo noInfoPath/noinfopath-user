@@ -23,6 +23,7 @@ describe("Testing noinfopath-user module", function(){
 			noLocalStorage = $injector.get('noLocalStorage');
 			noLoginService = $injector.get('noLoginService');
 			noUrl = $injector.get('noUrl');
+			noConfig = $injector.get('noConfig');
 		});
 	});
 
@@ -65,9 +66,10 @@ describe("Testing noinfopath-user module", function(){
 
 				$httpBackend
 					.when('POST',req.url)
-					.respond(200, "");
+					.respond(200, resp);
 
-				noLoginService.register(req.body)
+				noConfig.whenReady()
+					.then(noLoginService.register.bind(null, req.body))
 					.then(function(resp){
 						expect(resp.status).toBe(200);
 					})

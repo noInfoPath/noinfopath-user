@@ -23,6 +23,7 @@ describe("Testing noinfopath-user module", function(){
 			noLocalStorage = $injector.get('noLocalStorage');
 			noLoginService = $injector.get('noLoginService');
 			noUrl = $injector.get('noUrl');
+			noConfig = $injector.get('noConfig');
 		});
 	});
 
@@ -36,8 +37,8 @@ describe("Testing noinfopath-user module", function(){
 		expect(noLoginService);
 	});
 
-	var req = noLoginServiceMocks.updatepass.request
-	var resp = noLoginServiceMocks.updatepass.response
+	var req = noLoginServiceMocks.updatepass.request;
+	var resp = noLoginServiceMocks.updatepass.response;
 
 	describe("Testing noLoginService", function(){
 
@@ -56,18 +57,15 @@ describe("Testing noinfopath-user module", function(){
 
 			it("Should successfully update a users password.", function(done){
 				$httpBackend
-						.when("GET", "/config.json")
-						.respond(200,mockConfig);
-
-				// $httpBackend
-				//		.when("GET", NoCacheManifest.request.url)
-				//		.respond(200,NoCacheManifest.response.body);
+					.when("GET", "/config.json")
+					.respond(200,mockConfig);
 
 				$httpBackend
-					.when('POST',req.url)
-					.respond(200, "");
+					.when("POST",req.url)
+					.respond(resp.status, resp);
 
-				noLoginService.changePassword(req.body)
+				noConfig.whenReady()
+					.then(noLoginService.changePassword.bind(null, req.body))
 					.then(function(resp){
 						expect(resp.status).toBe(200);
 					})

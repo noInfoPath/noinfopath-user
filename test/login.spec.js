@@ -23,6 +23,7 @@ describe("Testing noinfopath-user module", function(){
 			_ = $injector.get("lodash");
 			noConfig = $injector.get("noConfig");
 		});
+
 	});
 
 
@@ -79,7 +80,8 @@ describe("Testing noinfopath-user module", function(){
 					.when('POST',req.url)
 					.respond(resp.body, resp.header);
 
-				noLoginService.login(req.body)
+				noConfig.whenReady()
+					.then(noLoginService.login.bind(null, req.body))
 					.then(function(token){
 						var x = angular.toJson(token);
 

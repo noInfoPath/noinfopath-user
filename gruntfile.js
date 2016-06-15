@@ -23,7 +23,8 @@ module.exports = function(grunt) {
 		        src: [
 		        	'src/globals.js',
 		        	'src/login.js',
-                    'src/directives.js'
+                    'src/directives.js',
+                    'src/security.js'
 		        ],
 		        dest: 'dist/noinfopath-user.js'
 		    },
