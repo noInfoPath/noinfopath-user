@@ -9,10 +9,10 @@
  * experience.
  *
  */
-(function(angular, undefined){
+(function (angular, undefined) {
 	"use strict";
 
-	angular.module('noinfopath.user',[
+	angular.module('noinfopath.user', [
 		'base64',
 		/*'http-auth-interceptor',*/
 		'noinfopath.data',

@@ -1,22 +1,22 @@
 var $httpBackend, $timeout, $base64, noLocalStorage, noLoginService, noLoginServiceProvider, noUrl
 
 
-describe("Testing noinfopath-user module", function(){
+describe("Testing noinfopath-user module", function () {
 
-	beforeEach(function() {
+	beforeEach(function () {
 		module('noinfopath.user', 'base64', 'noinfopath.data', 'noinfopath.helpers', 'http-auth-interceptor');
 
 		// Here we create a fake module just to intercept and store the provider
 		// when it's injected, i.e. during the config phase.
 		angular.module('dummyModule', [])
-	  		.config(['noLoginServiceProvider', function(_noLoginServiceProvider_) {
-	    		noLoginServiceProvider = _noLoginServiceProvider_;
+			.config(['noLoginServiceProvider', function (_noLoginServiceProvider_) {
+				noLoginServiceProvider = _noLoginServiceProvider_;
 	  		}]);
 
 		module('dummyModule');
 
 		// This actually triggers the injection into dummyModule
-		inject(function($injector){
+		inject(function ($injector) {
 			$httpBackend = $injector.get('$httpBackend');
 			$timeout = $injector.get('$timeout');
 			$base64 = $injector.get('$base64');
@@ -28,21 +28,21 @@ describe("Testing noinfopath-user module", function(){
 	});
 
 
-	it("Module must implement a provider interface for configuration", function(){
+	it("Module must implement a provider interface for configuration", function () {
 		expect(noLoginServiceProvider);
 	});
 
 
-	it("Module must implement all expected services", function(){
+	it("Module must implement all expected services", function () {
 		expect(noLoginService);
 	});
 
 	var req = noLoginServiceMocks.updatepass.request;
 	var resp = noLoginServiceMocks.updatepass.response;
 
-	describe("Testing noLoginService", function(){
+	describe("Testing noLoginService", function () {
 
-		it("All noLoginService interfaces must exist.", function(){
+		it("All noLoginService interfaces must exist.", function () {
 			expect(noLoginService.login);
 			expect(noLoginService.isAuthorized);
 			expect(noLoginService.isAuthenticated);
@@ -53,23 +53,24 @@ describe("Testing noinfopath-user module", function(){
 			clientCredentials: null
 		};
 
-		describe("Testing noLoginService.updatepass...", function(){
+		describe("Testing noLoginService.updatepass...", function () {
 
-			it("Should successfully update a users password.", function(done){
+			it("Should successfully update a users password.", function (done) {
 				$httpBackend
 					.when("GET", "/config.json")
-					.respond(200,mockConfig);
+					.respond(200, mockConfig);
 
 				$httpBackend
-					.when("POST",req.url)
+					.when("POST", req.url)
 					.respond(resp.status, resp);
 
 				noConfig.whenReady()
 					.then(noLoginService.changePassword.bind(null, req.body))
-					.then(function(resp){
-						expect(resp.status).toBe(200);
+					.then(function (resp) {
+						expect(resp.status)
+							.toBe(200);
 					})
-					.catch(function(err){
+					.catch(function (err) {
 						console.log("err", err);
 					})
 					.finally(done);
