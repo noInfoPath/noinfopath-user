@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 1.2.0
+ * @version 1.2.1
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -508,84 +508,6 @@
 			};
 		}])
 
-		.directive("noSecurity", ["noLoginService", "$state", "noFormConfig", "noConfig", function(noLoginService, $state, noFormConfig, noConfig){
-			function _link(scope, el, attrs){
-				var objectId;
-
-				if(attrs.noSecurity){
-					if(attrs.noSecurity == "entity")
-					{
-						if($state.params.entity){
-							objectId = noConfig.current.securityObjects[$state.params.entity];
-						} else {
-							objectId = noConfig.current.securityObjects[$state.current.name];
-						}
-					} else {
-						objectId = attrs.noSecurity;
-					}
-					var perm = noLoginService.user.getPermissions(objectId);
-
-					if(attrs.grant == "W"){
-						if(perm && perm.canWrite){
-							el.removeClass("ng-hide");
-						} else {
-							el.addClass("ng-hide");
-						}
-					} else {
-						if(perm && perm.canRead){
-							el.removeClass("ng-hide");
-						} else {
-							el.addClass("ng-hide");
-						}
-					}
-				}
-				// } else {
-				// 	noFormConfig.getFormByRoute($state.current.name, $state.params.entity, scope)
-				// 		.then(function(data){
-				// 			if(noLoginService.user.getPermissions(data.security[attrs.noNav])){
-				// 				el.removeClass("ng-hide");
-				// 			} else {
-				// 				el.addClass("ng-hide");
-				// 			}
-				// 		})
-				// 		.catch(function(err) {
-				// 			console.error(err);
-				// 		});
-				// }
-
-			}
-
-			return {
-				restrict: "A",
-				link: _link
-			};
-		}])
-
-		.directive("noSecurityMenu", ["noLoginService", "$state", "noFormConfig", "noConfig", function(noLoginService, $state, noFormConfig, noConfig){
-			function _compile(el, attrs){
-
-				var buttons = el.find("button");
-
-				for (var i = 0; i < buttons.length; i++){
-					var buttonH = buttons[i],
-						buttonA = angular.element(buttonH),
-						matches = buttonH.outerHTML.match(/{[^}]*\}/g),
-						match = matches ? matches[0].replace(/&quot;/g, "\"") : undefined,
-						entityConfig = angular.fromJson(match ? match : {entity: buttonA.attr("ui-sref")}),
-						sid = noConfig.current.securityObjects[entityConfig.entity];
-
-					buttonA.attr("no-security", sid);
-				}
-
-				return angular.noop;
-			}
-
-			return {
-				restrict: "A",
-				compile: _compile
-			};
-		}])
-
 		.directive("noUserGroups", ["$q", "$http", "noConfig", "$state", "noUrl", "noLoginService", "lodash", function($q, $http, noConfig, $state, noUrl, noLoginService, _){
 			function _link(scope, el, attrs){
 				var deferred = $q.defer(),
@@ -683,6 +605,96 @@
 
 			$scope.close = function () {
 				$uibModalInstance.dismiss("cancel");
+			};
+		}])
+	;
+})(angular);
+
+//security.js
+(function (angular, undefined) {
+	"use strict";
+
+	angular.module("noinfopath.user")
+
+		.directive("noSecurity", ["noLoginService", "$state", "noFormConfig", "noConfig", "noSecurity", function (noLoginService, $state, noFormConfig, noConfig, noSecurity) {
+			function _link(scope, el, attrs) {
+				var perm, scopeVal;
+
+				perm = noSecurity.getPermissions(attrs.noSecurity);
+
+				if(attrs.grant === "W") {
+					if(perm && perm.canWrite) {
+						el.removeClass("ng-hide");
+					} else {
+						el.addClass("ng-hide");
+					}
+				} else {
+					if(perm && perm.canRead) {
+						el.removeClass("ng-hide");
+					} else {
+						el.addClass("ng-hide");
+					}
+				}
+
+			}
+
+			function _compile(el, attrs) {
+				if(attrs.ngShow) {
+					el.attr("ng-show", null);
+				}
+
+				return _link;
+			}
+
+			return {
+				restrict: "A",
+				compile: _compile
+			};
+		}])
+
+		.directive("noSecurityMenu", ["noLoginService", "$state", "noFormConfig", "noConfig", function (noLoginService, $state, noFormConfig, noConfig) {
+			function _compile(el, attrs) {
+
+				var buttons = el.find("button");
+
+				for(var i = 0; i < buttons.length; i++) {
+					var buttonH = buttons[i],
+						buttonA = angular.element(buttonH),
+						matches = buttonH.outerHTML.match(/{[^}]*\}/g),
+						match = matches ? matches[0].replace(/&quot;/g, "\"") : undefined,
+						entityConfig = angular.fromJson(match ? match : {
+							entity: buttonA.attr("ui-sref")
+						}),
+						sid = noConfig.current.securityObjects[entityConfig.entity];
+
+					buttonA.attr("no-security", sid);
+				}
+
+				return angular.noop;
+			}
+
+			return {
+				restrict: "A",
+				compile: _compile
+			};
+		}])
+
+		.service("noSecurity", ["noLoginService", "$state", "noFormConfig", "noConfig", function (noLoginService, $state, noFormConfig, noConfig) {
+			this.getPermissions = function (securityObject) {
+				var objectId;
+
+				if(securityObject === "entity") {
+					if($state.params.entity) {
+						objectId = noConfig.current.securityObjects[$state.params.entity];
+					} else {
+						objectId = noConfig.current.securityObjects[$state.current.name];
+					}
+				} else {
+					objectId = securityObject;
+				}
+				var perm = noLoginService.user.getPermissions(objectId);
+
+				return perm; //returns undefined or an object
 			};
 		}])
 	;
