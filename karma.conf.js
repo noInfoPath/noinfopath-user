@@ -33,7 +33,7 @@ module.exports = function(config) {
 			"test/*.spec.js",
 			"src/globals.js",
 			"src/login.js",
-			"src/offline.js"
+			"src/security.js"
 		],
 
 

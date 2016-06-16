@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 1.2.0
+ * @version 1.2.1
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -9,10 +9,10 @@
  * experience.
  *
  */
-(function(angular, undefined){
+(function (angular, undefined) {
 	"use strict";
 
-	angular.module('noinfopath.user',[
+	angular.module('noinfopath.user', [
 		'base64',
 		/*'http-auth-interceptor',*/
 		'noinfopath.data',

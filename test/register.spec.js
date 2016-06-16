@@ -1,47 +1,48 @@
 var $httpBackend, $timeout, $base64, noLocalStorage, noLoginService, noLoginServiceProvider, noUrl
 
 
-describe("Testing noinfopath-user module", function(){
+describe("Testing noinfopath-user module", function () {
 
-	beforeEach(function() {
+	beforeEach(function () {
 		module('noinfopath.user', 'base64', 'noinfopath.data', 'noinfopath.helpers', 'http-auth-interceptor');
 
 		// Here we create a fake module just to intercept and store the provider
 		// when it's injected, i.e. during the config phase.
 		angular.module('dummyModule', [])
-	  		.config(['noLoginServiceProvider', function(_noLoginServiceProvider_) {
-	    		noLoginServiceProvider = _noLoginServiceProvider_;
+			.config(['noLoginServiceProvider', function (_noLoginServiceProvider_) {
+				noLoginServiceProvider = _noLoginServiceProvider_;
 	  		}]);
 
 		module('dummyModule');
 
 		// This actually triggers the injection into dummyModule
-		inject(function($injector){
+		inject(function ($injector) {
 			$httpBackend = $injector.get('$httpBackend');
 			$timeout = $injector.get('$timeout');
 			$base64 = $injector.get('$base64');
 			noLocalStorage = $injector.get('noLocalStorage');
 			noLoginService = $injector.get('noLoginService');
 			noUrl = $injector.get('noUrl');
+			noConfig = $injector.get('noConfig');
 		});
 	});
 
 
-	it("Module must implement a provider interface for configuration", function(){
+	it("Module must implement a provider interface for configuration", function () {
 		expect(noLoginServiceProvider);
 	});
 
 
-	it("Module must implement all expected services", function(){
+	it("Module must implement all expected services", function () {
 		expect(noLoginService);
 	});
 
 	var req = noLoginServiceMocks.register.request;
 	var resp = noLoginServiceMocks.register.response;
 
-	describe("Testing noLoginService", function(){
+	describe("Testing noLoginService", function () {
 
-		it("All noLoginService interfaces must exist.", function(){
+		it("All noLoginService interfaces must exist.", function () {
 			expect(noLoginService.login);
 			expect(noLoginService.isAuthorized);
 			expect(noLoginService.isAuthenticated);
@@ -52,26 +53,28 @@ describe("Testing noinfopath-user module", function(){
 			clientCredentials: null
 		};
 
-		describe("Testing noLoginService.register...", function(){
+		describe("Testing noLoginService.register...", function () {
 
-			it("Should successfully register a user and return a status code of 200", function(done){
+			it("Should successfully register a user and return a status code of 200", function (done) {
 				$httpBackend
 					.when("GET", "/config.json")
-					.respond(200,mockConfig);
+					.respond(200, mockConfig);
 
 				// $httpBackend
 				// 		.when("GET", NoCacheManifest.request.url)
 				// 		.respond(200,NoCacheManifest.response.body);
 
 				$httpBackend
-					.when('POST',req.url)
-					.respond(200, "");
+					.when('POST', req.url)
+					.respond(200, resp);
 
-				noLoginService.register(req.body)
-					.then(function(resp){
-						expect(resp.status).toBe(200);
+				noConfig.whenReady()
+					.then(noLoginService.register.bind(null, req.body))
+					.then(function (resp) {
+						expect(resp.status)
+							.toBe(200);
 					})
-					.catch(function(err){
+					.catch(function (err) {
 						console.log("err", err);
 					})
 					.finally(done);

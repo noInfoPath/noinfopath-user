@@ -1,5 +1,5 @@
 //login.js
-(function(angular, undefined) {
+(function (angular, undefined) {
 	"use strict";
 
 	var $httpProviderRef;
@@ -52,7 +52,7 @@
 			securityObjects = noConfigCurrent ? noConfigCurrent.securityObjects : [],
 			tmp, permissions = {};
 
-		if (angular.isObject(data)) {
+		if(angular.isObject(data)) {
 			tmp = data;
 		} else {
 			tmp = angular.fromJson(data);
@@ -65,12 +65,12 @@
 			return aco.securityObjectID.toLowerCase() == objectId.toLowerCase();
 		}
 
-		for (var soi in securityObjects) {
+		for(var soi in securityObjects) {
 			var so = securityObjects[soi],
 				aco = _.find(tmp.acl, findAco.bind(null, so)),
 				soo;
 
-			if (aco) {
+			if(aco) {
 				soo = new NoAccessControl(aco);
 
 				permissions[so] = soo;
@@ -85,14 +85,14 @@
 
 		Object.defineProperties(this, {
 			"tokenExpired": {
-				"get": function() {
+				"get": function () {
 					var n = new Date();
 					return n >= this.expires;
 				}
 			}
 		});
 
-		this.getPermissions = function(objectId) {
+		this.getPermissions = function (objectId) {
 			return this.permissions[objectId];
 		};
 
@@ -103,12 +103,12 @@
 
 		Object.defineProperties(this, {
 			canRead: {
-				get: function() {
+				get: function () {
 					return aco && aco.grant.indexOf("R") > -1;
 				}
 			},
 			canWrite: {
-				get: function() {
+				get: function () {
 					return aco && aco.grant.indexOf("W") > -1;
 				}
 			}
@@ -233,22 +233,22 @@
 
 		Object.defineProperties(this, {
 			"isAuthenticated": {
-				"get": function() {
+				"get": function () {
 					return angular.isObject(this.user);
 				}
 			},
 			"isAuthorized": {
-				"get": function() {
+				"get": function () {
 					return angular.isObject(this.user) && !this.user.tokenExpired;
 				}
 			},
 			"user": {
-				"get": function() {
+				"get": function () {
 					//console.log("user:get ", _user, angular.isUndefined(_user));
-					if (angular.isUndefined(_user)) {
+					if(angular.isUndefined(_user)) {
 						var u = noLocalStorage.getItem("noUser"),
 							j = angular.toJson(u);
-						if (u) {
+						if(u) {
 							_user = new NoInfoPathUser(_, noConfig, j);
 						}
 					}
@@ -258,9 +258,9 @@
 			}
 		});
 
-		this.whenAuthorized = function() {
-			return $q(function(resolve, reject) {
-				if (this.isAuthorized) {
+		this.whenAuthorized = function () {
+			return $q(function (resolve, reject) {
+				if(this.isAuthorized) {
 					$httpProviderRef.defaults.headers.common.Authorization = this.user.token_type + " " + this.user.access_token;
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
@@ -268,10 +268,10 @@
 					resolve(this.user);
 				} else {
 
-					if ($rootScope.failedLoginAttepts === -1) {
+					if($rootScope.failedLoginAttepts === -1) {
 						reject("authServiceOffline");
 					} else {
-						if ($rootScope.failedLoginAttepts > 3) {
+						if($rootScope.failedLoginAttepts > 3) {
 							reject("tooManyFailedLogons");
 						} else {
 							reject("login");
@@ -292,7 +292,7 @@
 				};
 
 			noHTTP.noRequestForm(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					var user = new NoInfoPathUser(_, noConfig, resp);
 
 					noLocalStorage.setItem("noUser", user);
@@ -303,9 +303,9 @@
 
 					deferred.resolve(user);
 				})
-				.catch(function(err) {
+				.catch(function (err) {
 					var msg = "";
-					switch (err.status) {
+					switch(err.status) {
 						case 400:
 							msg = err.data.error_description;
 							$rootScope.failedLoginAttepts++;
@@ -333,7 +333,7 @@
 				};
 
 			noHTTP.noRequestJSON(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					deferred.resolve(resp);
 				})
 				.catch(deferred.reject);
@@ -353,7 +353,7 @@
 				};
 
 			noHTTP.noRequestJSON(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					deferred.resolve(resp);
 				})
 				.catch(deferred.reject);
@@ -361,7 +361,7 @@
 			return deferred.promise;
 		};
 
-		this.setPassword = function(setPasswordInfo) {
+		this.setPassword = function (setPasswordInfo) {
 			var deferred = $q.defer(),
 				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/setpassword"),
 				method = "POST",
@@ -372,7 +372,7 @@
 				};
 
 			noHTTP.noRequestJSON(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					deferred.resolve(resp);
 				})
 				.catch(deferred.reject);
@@ -380,17 +380,17 @@
 			return deferred.promise;
 		};
 
-		this.updatePermissions = function(updatePermissionInfo) {
+		this.updatePermissions = function (updatePermissionInfo) {
 			var deferred = $q.defer(),
 				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/updatepermissions"),
 				method = "POST",
 				data = updatePermissionInfo;
 
 			noHTTP.noRequestJSON(url, method, data)
-				.then(function(resp) {
+				.then(function (resp) {
 					deferred.resolve(resp);
 				})
-				.catch(function(err) {
+				.catch(function (err) {
 					deferred.reject(err);
 				});
 
@@ -401,32 +401,32 @@
 			_user = "";
 			noLocalStorage.removeItem("noUser");
 
-			if (stores && stores.nonDBStores) {
-				for (var s in stores.nonDBStores) {
+			if(stores && stores.nonDBStores) {
+				for(var s in stores.nonDBStores) {
 					noLocalStorage.removeItem(stores.nonDBStores[s]);
 				}
 			}
 
-			if (cleardb && (stores.dbStores.clearDB === true)) {
-				for (var d in stores.dbStores.stores) {
+			if(cleardb && (stores.dbStores.clearDB === true)) {
+				for(var d in stores.dbStores.stores) {
 					noLocalStorage.removeItem(stores.dbStores.stores[d]);
 				}
 			}
 		};
 
-		$rootScope.$on("event:auth-loginRequired", function() {
+		$rootScope.$on("event:auth-loginRequired", function () {
 			$rootScope.$broadcast("noLoginService::loginRequired");
 		});
 	}
 
 	angular.module("noinfopath.user")
 
-	.config(["$httpProvider", function($httpProvider) {
+	.config(["$httpProvider", function ($httpProvider) {
 		$httpProviderRef = $httpProvider;
 	}])
 
 
-	.factory("noLoginService", ["$q", "noHTTP", "$base64", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _) {
+	.factory("noLoginService", ["$q", "noHTTP", "$base64", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _) {
 		return new LoginService($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _);
 	}]);
 })(angular);

@@ -1,19 +1,19 @@
 var $httpBackend, $timeout, $base64, noLocalStorage, noLoginService, noUrl, _, noConfig;
 
 
-describe("Testing noinfopath-user module", function(){
+describe("Testing noinfopath-user module", function () {
 
-	beforeEach(function() {
+	beforeEach(function () {
 		module("noinfopath.user");
 
 		//'base64', 'noinfopath.data', 'noinfopath.helpers', 'http-auth-interceptor', 'ui.router');
 
-		module(function($provide, noLoginServiceProvider){
+		module(function ($provide, noLoginServiceProvider) {
 			$provide.provider("noLoginService", noLoginServiceProvider);
 		});
 
 		// This actually triggers the injection into dummyModule
-		inject(function($injector){
+		inject(function ($injector) {
 			$httpBackend = $injector.get('$httpBackend');
 			$timeout = $injector.get('$timeout');
 			$base64 = $injector.get('$base64');
@@ -23,34 +23,35 @@ describe("Testing noinfopath-user module", function(){
 			_ = $injector.get("lodash");
 			noConfig = $injector.get("noConfig");
 		});
+
 	});
 
 
-	it("Module must implement a provider interface for configuration", function(){
+	it("Module must implement a provider interface for configuration", function () {
 		expect(noLoginServiceProvider);
 	});
 
 
-	it("Module must implement all expected services", function(){
+	it("Module must implement all expected services", function () {
 		expect(noLoginService);
 	});
 
-	describe("Testing noLoginService", function(){
+	describe("Testing noLoginService", function () {
 
-		describe("All noLoginService interfaces must exist.", function(){
-			it("should expose a login method.", function(){
+		describe("All noLoginService interfaces must exist.", function () {
+			it("should expose a login method.", function () {
 				expect(noLoginService.login);
 			});
 
-			it("should expose a isAuthorized method.", function(){
+			it("should expose a isAuthorized method.", function () {
 				expect(noLoginService.isAuthorized);
 			});
 
-			it("should expose a isAuthenticated method.", function(){
+			it("should expose a isAuthenticated method.", function () {
 				expect(noLoginService.isAuthenticated);
 			});
 
-			it("should expose a user method.", function(){
+			it("should expose a user method.", function () {
 				expect(noLoginService.user);
 			});
 
@@ -63,29 +64,31 @@ describe("Testing noinfopath-user module", function(){
 		var req = noLoginServiceMocks.login.request;
 		var resp = noLoginServiceMocks.login.response;
 
-		describe("Testing noLoginService.login...", function(){
+		describe("Testing noLoginService.login...", function () {
 
-			it("should return an access token.", function(done){
+			it("should return an access token.", function (done) {
 
 				$httpBackend
 					.when("GET", "/config.json")
-					.respond(200,mockConfig);
+					.respond(200, mockConfig);
 
 				// $httpBackend
 				// 		.when("GET", NoCacheManifest.request.url)
 				// 		.respond(200,NoCacheManifest.response.body);
 
 				$httpBackend
-					.when('POST',req.url)
+					.when('POST', req.url)
 					.respond(resp.body, resp.header);
 
-				noLoginService.login(req.body)
-					.then(function(token){
+				noConfig.whenReady()
+					.then(noLoginService.login.bind(null, req.body))
+					.then(function (token) {
 						var x = angular.toJson(token);
 
-						expect(x).toBeTruthy(noLoginServiceMocks.login.noInfoPathUser);
+						expect(x)
+							.toBeTruthy(noLoginServiceMocks.login.noInfoPathUser);
 					})
-					.catch(function(err){
+					.catch(function (err) {
 						console.log("err", err);
 					})
 					.finally(done);
@@ -94,7 +97,7 @@ describe("Testing noinfopath-user module", function(){
 				$httpBackend.flush();
 			});
 
-			xit("noLoginService.user should return the expected user.", function(){
+			xit("noLoginService.user should return the expected user.", function () {
 				var nou = new noInfoPath.NoInfoPathUser(noLoginServiceMocks.login.noInfoPathUser);
 				noLocalStorage.setItem('noUser', nou);
 				var actual = angular.toJson(noLoginService.user);
@@ -105,23 +108,26 @@ describe("Testing noinfopath-user module", function(){
 				//console.log(user, noLoginServiceMocks.login.noInfoPathUser);
 				//console.log(user, noLoginServiceMocks.noInfoPathUser)
 
-				expect(angular.equals(actual, expected)).toBeTruthy();
+				expect(angular.equals(actual, expected))
+					.toBeTruthy();
 			});
 
-			it("noLoginService.isAuthenticated should return true when noLocalStorage.noUser is truthy.", function(){
+			it("noLoginService.isAuthenticated should return true when noLocalStorage.noUser is truthy.", function () {
 				var nou = new noInfoPath.NoInfoPathUser(_, noConfig, noLoginServiceMocks.login.noInfoPathUser);
 				noLocalStorage.setItem('noUser', nou);
-				expect(noLoginService.isAuthenticated).toBe(true);
+				expect(noLoginService.isAuthenticated)
+					.toBe(true);
 			});
 
-			it("noLoginService.isAuthenticated should return false when noLocalStorage.noUser is falsy.", function(){
+			it("noLoginService.isAuthenticated should return false when noLocalStorage.noUser is falsy.", function () {
 				noLoginService.logout(mockConfig.localStores);
 				//console.log("noLoginService.isAuthenticated", noLoginService.user)
-				expect(noLoginService.isAuthenticated).toBe(false);
+				expect(noLoginService.isAuthenticated)
+					.toBe(false);
 			});
 
-			it("noLoginService.isAuthorized should return true when noLocalStorage.noAuthToken is truthy.", function(){
-				var	t = angular.fromJson(noLoginServiceMocks.login.noInfoPathUser);
+			it("noLoginService.isAuthorized should return true when noLocalStorage.noAuthToken is truthy.", function () {
+				var t = angular.fromJson(noLoginServiceMocks.login.noInfoPathUser);
 				t.expires = new Date();
 				t.expires = new Date(t.expires.setFullYear(t.expires.getFullYear() + 1));
 				//console.log("Test", t);
@@ -131,18 +137,21 @@ describe("Testing noinfopath-user module", function(){
 				//console.log("Test", t);
 				noLocalStorage.setItem('noUser', t);
 
-				expect(noLoginService.isAuthorized).toBe(true);
+				expect(noLoginService.isAuthorized)
+					.toBe(true);
 			});
 
-			xit("noLoginService.isAuthorized should return false when noLocalStorage.noAuthToken is falsy.", function(){
+			xit("noLoginService.isAuthorized should return false when noLocalStorage.noAuthToken is falsy.", function () {
 				noLoginService.logout();
 
-				var	t = angular.fromJson(noLoginServiceMocks.login.noInfoPathUser);
-				t.expires = (new Date(2015,3,1)).toISOString();
+				var t = angular.fromJson(noLoginServiceMocks.login.noInfoPathUser);
+				t.expires = (new Date(2015, 3, 1))
+					.toISOString();
 
 				noLocalStorage.setItem('noUser', t);
 
-				expect(noLoginService.isAuthorized).toBe(false);
+				expect(noLoginService.isAuthorized)
+					.toBe(false);
 			});
 		});
 	});
