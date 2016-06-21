@@ -4,6 +4,12 @@
 
 	angular.module("noinfopath.user")
 
+	/*
+	 * ## noLogin : directive
+	 *
+	 * Sets the credential object and a login function that calls the noLoginService login function onto the scope.
+	 */
+
 	.directive("noLogin", [function () {
 		var noLoginController = ["$scope", "noLoginService", function ($scope, noLoginService) {
 			$scope.credentials = {
@@ -24,7 +30,13 @@
 		};
 
 		return dir;
-		}])
+	}])
+
+	/*
+	 * ## noUserMenu : directive
+	 *
+	 * Sets a logout function on the scope that opens a modal to let the user log out. If there are localStores within the configuration, it also gives the option to clear local storage.
+	 */
 
 	.directive("noUserMenu", [function () {
 		return {
@@ -50,7 +62,13 @@
 
 				}]
 		};
-		}])
+	}])
+
+	/*
+	 * ## noUserGroups : directive
+	 *
+	 * Dynamically creates a set of checkboxes based on the number of user groups from the configured NOREST database.
+	 */
 
 	.directive("noUserGroups", ["$q", "$http", "noConfig", "$state", "noUrl", "noLoginService", "lodash", function ($q, $http, noConfig, $state, noUrl, noLoginService, _) {
 		function _link(scope, el, attrs) {
@@ -117,12 +135,6 @@
 					}
 				})
 				.catch(deferred.reject);
-
-			// $http.get(url, "odata/NoInfoPath_Users(" + user + ")/NoInfoPath_Groups")
-			// 	.then(function(data){
-			//
-			// 	})
-			// 	.catch(deferred.reject);
 
 			return deferred;
 		}
