@@ -143,7 +143,7 @@
 			restrict: "E",
 			link: _link
 		};
-		}])
+	}])
 
 	.controller("userLogoutController", ["$scope", "$uibModalInstance", "noLoginService", "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
 		$scope.logout = function (option) {
@@ -163,5 +163,5 @@
 		$scope.close = function () {
 			$uibModalInstance.dismiss("cancel");
 		};
-		}]);
+	}]);
 })(angular);
