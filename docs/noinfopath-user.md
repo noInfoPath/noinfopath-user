@@ -1,5 +1,5 @@
 # noinfopath-user.js
-@version 1.2.1
+@version 1.2.2
 
 
 The noinfopath.user module contains services, and directives that assist in
@@ -53,13 +53,13 @@ requires an active network connection to the NoInfoPath REST Service.
 
 ### Constructors
 
-#### LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope)
+#### LoginService($q,$http,noLocalStorage,noUrl,noConfig, $rootScope)
 This constructor is call via the Angular $injector service, as such, all
 of the parameters must injectable services.
 
 ##### Usage
 ```js
-var ls = LoginService($q, $http, $base64, noLocalStorage, noUrl, noConfig, $rootScope);
+var ls = LoginService($q, $http, noLocalStorage, noUrl, noConfig, $rootScope);
 ```
 
 ##### Parameters
@@ -68,7 +68,6 @@ var ls = LoginService($q, $http, $base64, noLocalStorage, noUrl, noConfig, $root
 |----|----|-----------|
 |$q|Service|AngularJS promise service|
 |$http|Service|AngularJS HTTP service|
-|$base64|Service|Base64 conversion service|
 |noLocalStorage|Service|NoInfoPath LocalStorage service|
 |noUrl|Service|NoInfoPath Url formatting service|
 |noConfig|Service|NoInfoPath Configuration service|

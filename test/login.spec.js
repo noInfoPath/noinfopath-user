@@ -1,4 +1,4 @@
-var $httpBackend, $timeout, $base64, noLocalStorage, noLoginService, noUrl, _, noConfig;
+var $httpBackend, $timeout, noLocalStorage, noLoginService, noUrl, _, noConfig;
 
 
 describe("Testing noinfopath-user module", function () {
@@ -6,7 +6,7 @@ describe("Testing noinfopath-user module", function () {
 	beforeEach(function () {
 		module("noinfopath.user");
 
-		//'base64', 'noinfopath.data', 'noinfopath.helpers', 'http-auth-interceptor', 'ui.router');
+		// 'noinfopath.data', 'noinfopath.helpers', 'http-auth-interceptor', 'ui.router');
 
 		module(function ($provide, noLoginServiceProvider) {
 			$provide.provider("noLoginService", noLoginServiceProvider);
@@ -16,7 +16,6 @@ describe("Testing noinfopath-user module", function () {
 		inject(function ($injector) {
 			$httpBackend = $injector.get('$httpBackend');
 			$timeout = $injector.get('$timeout');
-			$base64 = $injector.get('$base64');
 			noLocalStorage = $injector.get('noLocalStorage');
 			noLoginService = $injector.get('noLoginService');
 			noUrl = $injector.get('noUrl');

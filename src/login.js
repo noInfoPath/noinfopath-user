@@ -123,13 +123,13 @@
 	 *
 	 * ### Constructors
 	 *
-	 * #### LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope)
+	 * #### LoginService($q,$http,noLocalStorage,noUrl,noConfig, $rootScope)
 	 * This constructor is call via the Angular $injector service, as such, all
 	 * of the parameters must injectable services.
 	 *
 	 * ##### Usage
 	 * ```js
-	 * var ls = LoginService($q, $http, $base64, noLocalStorage, noUrl, noConfig, $rootScope);
+	 * var ls = LoginService($q, $http, noLocalStorage, noUrl, noConfig, $rootScope);
 	 * ```
 	 *
 	 * ##### Parameters
@@ -138,7 +138,6 @@
 	 * |----|----|-----------|
 	 * |$q|Service|AngularJS promise service|
 	 * |$http|Service|AngularJS HTTP service|
-	 * |$base64|Service|Base64 conversion service|
 	 * |noLocalStorage|Service|NoInfoPath LocalStorage service|
 	 * |noUrl|Service|NoInfoPath Url formatting service|
 	 * |noConfig|Service|NoInfoPath Configuration service|
@@ -225,7 +224,7 @@
 	 * |user|NoInfoPathUser|A reference to the currently logged in user.|
 	 *
 	 */
-	function LoginService($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _) {
+	function LoginService($q, noHTTP, noLocalStorage, noUrl, noConfig, $rootScope, _) {
 		var SELF = this,
 			_user;
 
@@ -426,7 +425,7 @@
 	}])
 
 
-	.factory("noLoginService", ["$q", "noHTTP", "$base64", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _) {
-		return new LoginService($q, noHTTP, $base64, noLocalStorage, noUrl, noConfig, $rootScope, _);
+	.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, noLocalStorage, noUrl, noConfig, $rootScope, _) {
+		return new LoginService($q, noHTTP, noLocalStorage, noUrl, noConfig, $rootScope, _);
 	}]);
 })(angular);
