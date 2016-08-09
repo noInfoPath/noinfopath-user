@@ -264,6 +264,7 @@
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
 					$rootScope.failedLoginAttepts = 0;
+					$rootScope.user = this.user;
 					resolve(this.user);
 				} else {
 
