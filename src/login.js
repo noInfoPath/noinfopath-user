@@ -224,7 +224,7 @@
 	 * |user|NoInfoPathUser|A reference to the currently logged in user.|
 	 *
 	 */
-	function LoginService($q, noHTTP, noLocalStorage, noUrl, noConfig, $rootScope, _) {
+	function LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
 		var SELF = this,
 			_user;
 
@@ -246,8 +246,9 @@
 					//console.log("user:get ", _user, angular.isUndefined(_user));
 					if(angular.isUndefined(_user)) {
 						var u = noLocalStorage.getItem("noUser"),
-							j = angular.toJson(u);
-						if(u) {
+							t = noSessionStorage.getItem("noUser"),
+							j = angular.toJson(u ? u : t);
+						if(u || t) {
 							_user = new NoInfoPathUser(_, noConfig, j);
 						}
 					}
@@ -264,7 +265,6 @@
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
 					$rootScope.failedLoginAttepts = 0;
-					$rootScope.user = this.user;
 					resolve(this.user);
 				} else {
 
@@ -295,7 +295,11 @@
 				.then(function (resp) {
 					var user = new NoInfoPathUser(_, noConfig, resp);
 
-					noLocalStorage.setItem("noUser", user);
+					if(!noConfig.current.noUser || noConfig.current.noUser.storeUser){
+						noLocalStorage.setItem("noUser", user);
+					}	else {
+						noSessionStorage.setItem("noUser", user);
+					}
 
 					$rootScope.noUserAuth = true;
 					$rootScope.user = user;
@@ -400,6 +404,7 @@
 		this.logout = function logout(stores, cleardb) {
 			_user = "";
 			noLocalStorage.removeItem("noUser");
+			noSessionStorage.removeItem("noUser");
 
 			if(stores && stores.nonDBStores) {
 				for(var s in stores.nonDBStores) {
@@ -426,7 +431,7 @@
 	}])
 
 
-	.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, noLocalStorage, noUrl, noConfig, $rootScope, _) {
-		return new LoginService($q, noHTTP, noLocalStorage, noUrl, noConfig, $rootScope, _);
+	.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noSessionStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
+		return new LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _);
 	}]);
 })(angular);

@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 1.2.2
+ * @version 1.2.3
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -246,7 +246,7 @@
 	 * |user|NoInfoPathUser|A reference to the currently logged in user.|
 	 *
 	 */
-	function LoginService($q, noHTTP, noLocalStorage, noUrl, noConfig, $rootScope, _) {
+	function LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
 		var SELF = this,
 			_user;
 
@@ -268,8 +268,9 @@
 					//console.log("user:get ", _user, angular.isUndefined(_user));
 					if(angular.isUndefined(_user)) {
 						var u = noLocalStorage.getItem("noUser"),
-							j = angular.toJson(u);
-						if(u) {
+							t = noSessionStorage.getItem("noUser"),
+							j = angular.toJson(u ? u : t);
+						if(u || t) {
 							_user = new NoInfoPathUser(_, noConfig, j);
 						}
 					}
@@ -286,7 +287,6 @@
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
 					$rootScope.failedLoginAttepts = 0;
-					$rootScope.user = this.user;
 					resolve(this.user);
 				} else {
 
@@ -317,7 +317,11 @@
 				.then(function (resp) {
 					var user = new NoInfoPathUser(_, noConfig, resp);
 
-					noLocalStorage.setItem("noUser", user);
+					if(!noConfig.current.noUser || noConfig.current.noUser.storeUser){
+						noLocalStorage.setItem("noUser", user);
+					}	else {
+						noSessionStorage.setItem("noUser", user);
+					}
 
 					$rootScope.noUserAuth = true;
 					$rootScope.user = user;
@@ -422,6 +426,7 @@
 		this.logout = function logout(stores, cleardb) {
 			_user = "";
 			noLocalStorage.removeItem("noUser");
+			noSessionStorage.removeItem("noUser");
 
 			if(stores && stores.nonDBStores) {
 				for(var s in stores.nonDBStores) {
@@ -448,8 +453,8 @@
 	}])
 
 
-	.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, noLocalStorage, noUrl, noConfig, $rootScope, _) {
-		return new LoginService($q, noHTTP, noLocalStorage, noUrl, noConfig, $rootScope, _);
+	.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noSessionStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
+		return new LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _);
 	}]);
 })(angular);
 
@@ -458,6 +463,12 @@
 	"use strict";
 
 	angular.module("noinfopath.user")
+
+	/*
+	 * ## noLogin : directive
+	 *
+	 * Sets the credential object and a login function that calls the noLoginService login function onto the scope.
+	 */
 
 	.directive("noLogin", [function () {
 		var noLoginController = ["$scope", "noLoginService", function ($scope, noLoginService) {
@@ -479,7 +490,13 @@
 		};
 
 		return dir;
-		}])
+	}])
+
+	/*
+	 * ## noUserMenu : directive
+	 *
+	 * Sets a logout function on the scope that opens a modal to let the user log out. If there are localStores within the configuration, it also gives the option to clear local storage.
+	 */
 
 	.directive("noUserMenu", [function () {
 		return {
@@ -505,7 +522,13 @@
 
 				}]
 		};
-		}])
+	}])
+
+	/*
+	 * ## noUserGroups : directive
+	 *
+	 * Dynamically creates a set of checkboxes based on the number of user groups from the configured NOREST database.
+	 */
 
 	.directive("noUserGroups", ["$q", "$http", "noConfig", "$state", "noUrl", "noLoginService", "lodash", function ($q, $http, noConfig, $state, noUrl, noLoginService, _) {
 		function _link(scope, el, attrs) {
@@ -573,12 +596,6 @@
 				})
 				.catch(deferred.reject);
 
-			// $http.get(url, "odata/NoInfoPath_Users(" + user + ")/NoInfoPath_Groups")
-			// 	.then(function(data){
-			//
-			// 	})
-			// 	.catch(deferred.reject);
-
 			return deferred;
 		}
 
@@ -586,7 +603,7 @@
 			restrict: "E",
 			link: _link
 		};
-		}])
+	}])
 
 	.controller("userLogoutController", ["$scope", "$uibModalInstance", "noLoginService", "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
 		$scope.logout = function (option) {
@@ -606,7 +623,82 @@
 		$scope.close = function () {
 			$uibModalInstance.dismiss("cancel");
 		};
-		}]);
+	}])
+
+	.directive("noLogoutTimer", ["$timeout", "noLoginService", "noConfig", "$state", "$rootScope", "$interval", function($timeout, noLoginService, noConfig, $state, $rootScope, $interval){
+			function _compile(el, attrs){
+				el.html(
+					"<div class='no-logout-container'>" +
+						"<div class='no-logout-box no-flex-host'>" +
+							"<div class='no-logout-header no-flex no-flex-item size-0'>Inactivity Timer</div>" +
+							"<div class='no-logout-body no-flex no-flex-item size-1 vertical'>You will be logged out in <strong>{{logoutSeconds}}</strong> seconds due to inactivity. <br /> Click on 'Cancel' to stay logged in.</div>" +
+							"<div class='no-logout-footer no-flex no-flex-item size-0 horizontal flex-center'><button class='no-logout-button no-flex no-flex-item size-0 btn btn-primary' type='button'>Cancel</button></div>" +
+						"</div>" +
+					"</div>"
+				);
+
+				return _link;
+			}
+
+			function _link(scope, el, attrs){
+
+
+				var t = el.detach(),
+					btn = t.find(".no-logout-button"),
+					int;
+
+				t.addClass("ng-hide");
+
+        $("body").append(t);
+
+				btn.click(function(e){
+					el.addClass("ng-hide");
+					$interval.cancel(int);
+					resetTimer();
+				});
+
+				$rootScope.logoutTimerPopupHide = function(){
+					el.addClass("ng-hide");
+				}
+
+				$rootScope.logoutTimerPopupShow = function(){
+					el.removeClass("ng-hide");
+					scope.logoutSeconds = 60;
+
+					int = $interval(
+						function(){
+							scope.logoutSeconds--;
+
+							if(scope.logoutSeconds == 0){
+								$interval.cancel(int);
+								logout();
+							}
+						},
+						1000);
+				}
+
+				function resetTimer(){
+					$timeout.cancel(logoutTimeout);
+					logoutTimeout = $timeout($rootScope.logoutTimerPopupShow, noConfig.current.noUser.noLogoutTimer);
+				}
+
+				function logout(){
+					noLoginService.logout();
+					location.href = "/";
+				}
+
+				var logoutTimeout = $timeout(resetTimer, noConfig.current.noUser.noLogoutTimer);
+				document.onmousemove = resetTimer;
+    		document.onkeypress = resetTimer;
+			}
+
+			return {
+				restrict: "E",
+				compile: _compile
+			};
+	}])
+
+	;
 })(angular);
 
 //security.js

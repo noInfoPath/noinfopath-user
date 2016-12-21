@@ -163,5 +163,80 @@
 		$scope.close = function () {
 			$uibModalInstance.dismiss("cancel");
 		};
-	}]);
+	}])
+
+	.directive("noLogoutTimer", ["$timeout", "noLoginService", "noConfig", "$state", "$rootScope", "$interval", function($timeout, noLoginService, noConfig, $state, $rootScope, $interval){
+			function _compile(el, attrs){
+				el.html(
+					"<div class='no-logout-container'>" +
+						"<div class='no-logout-box no-flex-host'>" +
+							"<div class='no-logout-header no-flex no-flex-item size-0'>Inactivity Timer</div>" +
+							"<div class='no-logout-body no-flex no-flex-item size-1 vertical'>You will be logged out in <strong>{{logoutSeconds}}</strong> seconds due to inactivity. <br /> Click on 'Cancel' to stay logged in.</div>" +
+							"<div class='no-logout-footer no-flex no-flex-item size-0 horizontal flex-center'><button class='no-logout-button no-flex no-flex-item size-0 btn btn-primary' type='button'>Cancel</button></div>" +
+						"</div>" +
+					"</div>"
+				);
+
+				return _link;
+			}
+
+			function _link(scope, el, attrs){
+
+
+				var t = el.detach(),
+					btn = t.find(".no-logout-button"),
+					int;
+
+				t.addClass("ng-hide");
+
+        $("body").append(t);
+
+				btn.click(function(e){
+					el.addClass("ng-hide");
+					$interval.cancel(int);
+					resetTimer();
+				});
+
+				$rootScope.logoutTimerPopupHide = function(){
+					el.addClass("ng-hide");
+				}
+
+				$rootScope.logoutTimerPopupShow = function(){
+					el.removeClass("ng-hide");
+					scope.logoutSeconds = 60;
+
+					int = $interval(
+						function(){
+							scope.logoutSeconds--;
+
+							if(scope.logoutSeconds == 0){
+								$interval.cancel(int);
+								logout();
+							}
+						},
+						1000);
+				}
+
+				function resetTimer(){
+					$timeout.cancel(logoutTimeout);
+					logoutTimeout = $timeout($rootScope.logoutTimerPopupShow, noConfig.current.noUser.noLogoutTimer);
+				}
+
+				function logout(){
+					noLoginService.logout();
+					location.href = "/";
+				}
+
+				var logoutTimeout = $timeout(resetTimer, noConfig.current.noUser.noLogoutTimer);
+				document.onmousemove = resetTimer;
+    		document.onkeypress = resetTimer;
+			}
+
+			return {
+				restrict: "E",
+				compile: _compile
+			};
+	}])
+
+	;
 })(angular);

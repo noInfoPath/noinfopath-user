@@ -53,13 +53,13 @@ requires an active network connection to the NoInfoPath REST Service.
 
 ### Constructors
 
-#### LoginService($q,$http,$base64,noLocalStorage,noUrl,noConfig, $rootScope)
+#### LoginService($q,$http,noLocalStorage,noUrl,noConfig, $rootScope)
 This constructor is call via the Angular $injector service, as such, all
 of the parameters must injectable services.
 
 ##### Usage
 ```js
-var ls = LoginService($q, $http, $base64, noLocalStorage, noUrl, noConfig, $rootScope);
+var ls = LoginService($q, $http, noLocalStorage, noUrl, noConfig, $rootScope);
 ```
 
 ##### Parameters
@@ -68,7 +68,6 @@ var ls = LoginService($q, $http, $base64, noLocalStorage, noUrl, noConfig, $root
 |----|----|-----------|
 |$q|Service|AngularJS promise service|
 |$http|Service|AngularJS HTTP service|
-|$base64|Service|Base64 conversion service|
 |noLocalStorage|Service|NoInfoPath LocalStorage service|
 |noUrl|Service|NoInfoPath Url formatting service|
 |noConfig|Service|NoInfoPath Configuration service|
@@ -153,3 +152,17 @@ Undefined
 |isAuthenticated|Bool|Returns true if the there is a valid user stored in local storage|
 |isAuthorized|Bool|Turns true if the isAuthenticated and the bearer token is valid.|
 |user|NoInfoPathUser|A reference to the currently logged in user.|
+
+
+## noLogin : directive
+
+Sets the credential object and a login function that calls the noLoginService login function onto the scope.
+
+## noUserMenu : directive
+
+Sets a logout function on the scope that opens a modal to let the user log out. If there are localStores within the configuration, it also gives the option to clear local storage.
+
+## noUserGroups : directive
+
+Dynamically creates a set of checkboxes based on the number of user groups from the configured NOREST database.
+

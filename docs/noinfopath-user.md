@@ -1,5 +1,5 @@
 # noinfopath-user.js
-@version 1.2.2
+@version 1.2.3
 
 
 The noinfopath.user module contains services, and directives that assist in
@@ -153,4 +153,16 @@ Undefined
 |isAuthorized|Bool|Turns true if the isAuthenticated and the bearer token is valid.|
 |user|NoInfoPathUser|A reference to the currently logged in user.|
 
+
+## noLogin : directive
+
+Sets the credential object and a login function that calls the noLoginService login function onto the scope.
+
+## noUserMenu : directive
+
+Sets a logout function on the scope that opens a modal to let the user log out. If there are localStores within the configuration, it also gives the option to clear local storage.
+
+## noUserGroups : directive
+
+Dynamically creates a set of checkboxes based on the number of user groups from the configured NOREST database.
 
