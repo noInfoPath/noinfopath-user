@@ -166,3 +166,15 @@ Sets a logout function on the scope that opens a modal to let the user log out. 
 
 Dynamically creates a set of checkboxes based on the number of user groups from the configured NOREST database.
 
+
+
+noLogoutTimer is a directive that dynamically creates a modal popup that will show after a configured time informing the user that their inactivity
+will cause them to log out, and after 60 more seconds, log out the user.
+
+noLogoutTimer gets the configuration from noConfig, which is detailed below.
+
+|Name|Type|Description|
+|----|----|-----------|
+|noUser.noLogoutTimer|int|The amount of time in milliseconds of inactivity that elapses before the noLogoutTimer modal dialoge appears.|
+
+
