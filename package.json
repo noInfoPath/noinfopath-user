@@ -1,6 +1,6 @@
 {
   "name": "@noinfopath/noinfopath-user",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "noInfoPath user module",
   "main": "noinfopath-user.js",
   "directories": {

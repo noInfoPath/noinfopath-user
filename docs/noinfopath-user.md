@@ -1,5 +1,5 @@
 # noinfopath-user.js
-@version 1.2.2
+@version 1.2.3
 
 
 The noinfopath.user module contains services, and directives that assist in
@@ -152,5 +152,29 @@ Undefined
 |isAuthenticated|Bool|Returns true if the there is a valid user stored in local storage|
 |isAuthorized|Bool|Turns true if the isAuthenticated and the bearer token is valid.|
 |user|NoInfoPathUser|A reference to the currently logged in user.|
+
+
+## noLogin : directive
+
+Sets the credential object and a login function that calls the noLoginService login function onto the scope.
+
+## noUserMenu : directive
+
+Sets a logout function on the scope that opens a modal to let the user log out. If there are localStores within the configuration, it also gives the option to clear local storage.
+
+## noUserGroups : directive
+
+Dynamically creates a set of checkboxes based on the number of user groups from the configured NOREST database.
+
+
+
+noLogoutTimer is a directive that dynamically creates a modal popup that will show after a configured time informing the user that their inactivity
+will cause them to log out, and after 60 more seconds, log out the user.
+
+noLogoutTimer gets the configuration from noConfig, which is detailed below.
+
+|Name|Type|Description|
+|----|----|-----------|
+|noUser.noLogoutTimer|int|The amount of time in milliseconds of inactivity that elapses before the noLogoutTimer modal dialoge appears.|
 
 
