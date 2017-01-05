@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 1.2.3
+ * @version 2.0.1
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -75,10 +75,10 @@
 			tmp, permissions = {};
 
 		if(angular.isObject(data)) {
-			tmp = data;
+			tmp = data.data || data;
 		} else {
 			tmp = angular.fromJson(data);
-
+			tmp = tmp.data || tmp;
 		}
 
 		tmp.acl = angular.fromJson(tmp.acl);
@@ -164,6 +164,16 @@
 	 * |noUrl|Service|NoInfoPath Url formatting service|
 	 * |noConfig|Service|NoInfoPath Configuration service|
 	 * |$rootScope|Service|AngularJS root scope service.|
+	 *
+	 * ### Configuration
+	 *
+	 *	LoginService can be configured with an optional configuration hive in noConfig called noUser.
+	 *
+	 * |Name|Type|Description|
+	 * |----|----|-----------|
+	 * |noUser|Object|Optional object within noConfig that holds the configuration for the noinfopath-user module|
+	 * |noUser.storeUser|Boolean|Determines to persist user login information between browser sessions or not. Defaults to true|
+	 * |noUser.noLogoutTimer|Int|noLogoutTimer directive configuration value. The amount of time in milliseconds of inactivity that elapses before the noLogoutTimer modal dialoge appears.|
 	 *
 	 * ### Methods
 	 *

@@ -53,10 +53,10 @@
 			tmp, permissions = {};
 
 		if(angular.isObject(data)) {
-			tmp = data;
+			tmp = data.data || data;
 		} else {
 			tmp = angular.fromJson(data);
-
+			tmp = tmp.data || tmp;
 		}
 
 		tmp.acl = angular.fromJson(tmp.acl);
@@ -303,7 +303,7 @@
 
 			noHTTP.noRequestForm(url, method, data)
 				.then(function (resp) {
-					var user = new NoInfoPathUser(_, noConfig, resp.data || data);
+					var user = new NoInfoPathUser(_, noConfig, resp);
 
 					if(!noConfig.current.noUser || noConfig.current.noUser.storeUser){
 						noLocalStorage.setItem("noUser", user);

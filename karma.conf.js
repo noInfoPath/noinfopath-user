@@ -25,7 +25,6 @@ module.exports = function(config) {
 			"node_modules/@noinfopath/noinfopath-data/dist/noinfopath-data.js",
 			"node_modules/@noinfopath/noinfopath-logger/dist/noinfopath-logger.js",
 			"node_modules/angular-ui-router/release/angular-ui-router.js",
-			"bower_components/angular-http-auth/src/http-auth-interceptor.js",
 			"test/mock/configuration.mock.js",
 			"test/mock/nologinservice.mock.js",
 			"test/mock/manifest.mock.js",
