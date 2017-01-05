@@ -293,7 +293,7 @@
 
 			noHTTP.noRequestForm(url, method, data)
 				.then(function (resp) {
-					var user = new NoInfoPathUser(_, noConfig, resp);
+					var user = new NoInfoPathUser(_, noConfig, resp.data || data);
 
 					noLocalStorage.setItem("noUser", user);
 
