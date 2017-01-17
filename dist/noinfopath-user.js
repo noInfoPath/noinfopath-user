@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 2.0.1
+ * @version 2.0.2
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -481,22 +481,33 @@
 	 */
 
 	.directive("noLogin", [function () {
-		var noLoginController = ["$scope", "noLoginService", function ($scope, noLoginService) {
-			$scope.credentials = {
-				username: null,
-				password: null
-			};
-
-			$scope.login = function () {
-				//log.write($scope.credentials);
-				noLoginService.login($scope.credentials);
-			};
-
-			}];
 
 		var dir = {
-			require: "A",
-			link: noLoginController
+			templateUrl: function(el, attrs) {
+				return attrs.templateUrl;
+			},
+			restrict: "E",
+			link: function(scope, el, attrs) {
+				var validateTemplate = el.find("#username, #password, #loginBtn"),
+					btn = $(validateTemplate[2]);
+
+				if(validateTemplate.length !== 3) throw "noLogin directive requires that the login HTML contain #username, #password, #loginBtn elements."
+
+				btn.click(function(e){
+					var data = scope.credentials;
+
+					if(data.$valid) {
+						scope.$broadcast("noLogin::login", scope.credentials);
+					} else {
+						scope.$broadcast("no::validate");
+					}
+				});
+				// scope.login = function () {
+				// 	//log.write($scope.credentials);
+				// 	//noLoginService.login($scope.credentials);
+				// 	scope.$broadcast("noLogin::login", scope.credentials);
+				// };
+			}
 		};
 
 		return dir;
