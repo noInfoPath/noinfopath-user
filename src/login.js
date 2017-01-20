@@ -3,14 +3,12 @@
 	"use strict";
 
 	var $httpProviderRef;
-
 	/*
 	 * ## noLoginService : provider
 	 *
 	 * Returns an instance of the `LoginService` class will all dependencies
 	 *	injected.
 	 */
-
 	/*
 	 * ## NoInfoPathUser : Class
 	 *
@@ -114,7 +112,6 @@
 			}
 		});
 	}
-
 	/*
 	 * ## LoginService : Class
 	 * LoginService is a backing class for the noLoginService provider. It provides the
@@ -435,13 +432,11 @@
 	}
 
 	angular.module("noinfopath.user")
-
-	.config(["$httpProvider", function ($httpProvider) {
-		$httpProviderRef = $httpProvider;
-	}])
-
-
-	.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noSessionStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
-		return new LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _);
-	}]);
+		.config(["$httpProvider", function ($httpProvider) {
+			$httpProviderRef = $httpProvider;
+		}])
+		.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noSessionStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
+			return new LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _);
+		}])
+	;
 })(angular);

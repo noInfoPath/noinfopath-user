@@ -13,9 +13,7 @@
 	"use strict";
 
 	angular.module('noinfopath.user', [
-		/*'http-auth-interceptor',*/
 		'noinfopath.data',
 		'noinfopath.helpers'
 	]);
-
 })(angular);

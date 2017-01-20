@@ -36,7 +36,5 @@
 				return new noOfflineService($q, $timeout, $http, noConfig, noManifest, noIndexedDB);
 			}];
 		}])
-
 	;
-
 })(angular);
