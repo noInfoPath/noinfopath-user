@@ -4,32 +4,44 @@
 
 	angular.module("noinfopath.user")
 
-		/*
-		 * ## noLogin : directive
-		 *
-		 * Sets the credential object and a login function that calls the noLoginService login function onto the scope.
-		 */
-		.directive("noLogin", [function () {
-			var noLoginController = ["$scope", "noLoginService", function ($scope, noLoginService) {
-				$scope.credentials = {
-					username: null,
-					password: null
-				};
+	/*
+	 * ## noLogin : directive
+	 *
+	 * Sets the credential object and a login function that calls the noLoginService login function onto the scope.
+	 */
 
-				$scope.login = function () {
-					//log.write($scope.credentials);
-					noLoginService.login($scope.credentials);
-				};
+	.directive("noLogin", [function () {
 
-				}];
+		var dir = {
+			templateUrl: function(el, attrs) {
+				return attrs.templateUrl;
+			},
+			restrict: "E",
+			link: function(scope, el, attrs) {
+				var validateTemplate = el.find("#username, #password, #loginBtn"),
+					btn = $(validateTemplate[2]);
 
-			var dir = {
-				require: "A",
-				link: noLoginController
-			};
+				if(validateTemplate.length !== 3) throw "noLogin directive requires that the login HTML contain #username, #password, #loginBtn elements."
 
-			return dir;
-		}])
+				btn.click(function(e){
+					var data = scope.credentials;
+
+					if(data.$valid) {
+						scope.$broadcast("noLogin::login", scope.credentials);
+					} else {
+						scope.$broadcast("no::validate");
+					}
+				});
+				// scope.login = function () {
+				// 	//log.write($scope.credentials);
+				// 	//noLoginService.login($scope.credentials);
+				// 	scope.$broadcast("noLogin::login", scope.credentials);
+				// };
+			}
+		};
+
+		return dir;
+	}])
 
 		/*
 		 * ## noUserMenu : directive

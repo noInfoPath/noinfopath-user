@@ -230,6 +230,22 @@
 	 * |isAuthorized|Bool|Turns true if the isAuthenticated and the bearer token is valid.|
 	 * |user|NoInfoPathUser|A reference to the currently logged in user.|
 	 *
+	 * #### updateUser(userInfo)
+	 * Logs out the current user, and deletes all data stored in local storage.
+	 *
+	 * ##### Usage
+	 * ```js
+	 * 	noLoginService.updateUser(userInfo);
+	 * ```
+	 * ##### Parameters
+	 * 
+	 * |Name|Type|Description|
+	 * |----|----|-----------|
+	 * |userInfo|Object|An objet that contains the user to be updated, along with the properties to be updated. UserID, Email, and Username are required. FirstName and LastName are optional. |
+	 *
+	 * ##### Returns
+	 * AngularJS $q Promise Object. The promise returns the response from the RESTAPI.
+	 *
 	 */
 	function LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
 		var SELF = this,
@@ -288,7 +304,7 @@
 			}.bind(this));
 		}.bind(this);
 
-		this.login = function login(loginInfo) {
+		this.login = function (loginInfo) {
 			var deferred = $q.defer(),
 				url = noUrl.makeResourceUrl(noConfig.current.AUTHURI, "token"),
 				method = "POST",
@@ -333,7 +349,7 @@
 			return deferred.promise;
 		};
 
-		this.register = function register(registerInfo) {
+		this.register = function (registerInfo) {
 			var deferred = $q.defer(),
 				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/register"),
 				method = "POST",
@@ -352,7 +368,7 @@
 			return deferred.promise;
 		};
 
-		this.changePassword = function changePassword(updatePasswordInfo) {
+		this.changePassword = function(updatePasswordInfo) {
 			var deferred = $q.defer(),
 				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/changepassword"),
 				method = "POST",
@@ -408,7 +424,7 @@
 			return deferred.promise;
 		};
 
-		this.logout = function logout(stores, cleardb) {
+		this.logout = function (stores, cleardb) {
 			_user = "";
 			noLocalStorage.removeItem("noUser");
 			noSessionStorage.removeItem("noUser");
@@ -425,6 +441,27 @@
 				}
 			}
 		};
+
+		this.updateUser = function (userInfo) {
+			var deferred = $q.defer(),
+				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/updateuser"),
+				method = "POST",
+				data = {
+					"UserID": userInfo.UserID,
+					"EmailAddress": userInfo.Email,
+					"FirstName": userInfo.FirstName,
+					"LastName": userInfo.LastName,
+					"UserName": userInfo.UserName
+				};
+
+			noHTTP.noRequestJSON(url, method, data)
+				.then(function (resp) {
+					deferred.resolve(resp);
+				})
+				.catch(deferred.reject);
+
+			return deferred.promise;
+		}
 
 		$rootScope.$on("event:auth-loginRequired", function () {
 			$rootScope.$broadcast("noLoginService::loginRequired");
