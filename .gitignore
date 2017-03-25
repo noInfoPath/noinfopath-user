@@ -3,3 +3,4 @@
 /karma_html
 .DS_Store
 /coverage
+npm-debug.log
