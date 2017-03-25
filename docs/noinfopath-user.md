@@ -1,5 +1,5 @@
 # noinfopath-user.js
-@version 2.0.2
+@version 2.0.3
 
 
 The noinfopath.user module contains services, and directives that assist in
@@ -162,6 +162,22 @@ Undefined
 |isAuthenticated|Bool|Returns true if the there is a valid user stored in local storage|
 |isAuthorized|Bool|Turns true if the isAuthenticated and the bearer token is valid.|
 |user|NoInfoPathUser|A reference to the currently logged in user.|
+
+#### updateUser(userInfo)
+Logs out the current user, and deletes all data stored in local storage.
+
+##### Usage
+```js
+	noLoginService.updateUser(userInfo);
+```
+##### Parameters
+
+|Name|Type|Description|
+|----|----|-----------|
+|userInfo|Object|An objet that contains the user to be updated, along with the properties to be updated. UserID, Email, and Username are required. FirstName and LastName are optional. |
+
+##### Returns
+AngularJS $q Promise Object. The promise returns the response from the RESTAPI.
 
 
 ## noLogin : directive

@@ -43,13 +43,12 @@
 		return dir;
 	}])
 
-	/*
-	 * ## noUserMenu : directive
-	 *
-	 * Sets a logout function on the scope that opens a modal to let the user log out. If there are localStores within the configuration, it also gives the option to clear local storage.
-	 */
-
-	.directive("noUserMenu", [function () {
+		/*
+		 * ## noUserMenu : directive
+		 *
+		 * Sets a logout function on the scope that opens a modal to let the user log out. If there are localStores within the configuration, it also gives the option to clear local storage.
+		 */
+		.directive("noUserMenu", [function () {
 		return {
 			template: "Welcome {{user.username}}",
 			controller: ["$scope", "$uibModal", "noConfig", "noLoginService", function ($scope, $uibModal, noConfig, noLoginService) {
@@ -75,13 +74,12 @@
 		};
 	}])
 
-	/*
-	 * ## noUserGroups : directive
-	 *
-	 * Dynamically creates a set of checkboxes based on the number of user groups from the configured NOREST database.
-	 */
-
-	.directive("noUserGroups", ["$q", "$http", "noConfig", "$state", "noUrl", "noLoginService", "lodash", function ($q, $http, noConfig, $state, noUrl, noLoginService, _) {
+		/*
+		 * ## noUserGroups : directive
+		 *
+		 * Dynamically creates a set of checkboxes based on the number of user groups from the configured NOREST database.
+		 */
+		.directive("noUserGroups", ["$q", "$http", "noConfig", "$state", "noUrl", "noLoginService", "lodash", function ($q, $http, noConfig, $state, noUrl, noLoginService, _) {
 		function _link(scope, el, attrs) {
 			var deferred = $q.defer(),
 				user = $state.params.id,
@@ -155,8 +153,77 @@
 			link: _link
 		};
 	}])
+		.directive("noSecurityGroups", ["$q", "$http", "noConfig", "$state", "noUrl", "noLoginService", "lodash", function ($q, $http, noConfig, $state, noUrl, noLoginService, _) {
+			function _link(scope, el, attrs) {
+				var deferred = $q.defer(),
+					group = $state.params.id,
+					securityObjects = noUrl.makeResourceUrl(noConfig.current.NOREST, "odata/NoInfoPath_Security_Objects"),
+					memberGroupURL = noUrl.makeResourceUrl(noConfig.current.NOREST, "odata/NoInfoPath_Groups(guid'" + group + "')/NoInfoPath_Security_Objects"),
+					groups;
 
-	.controller("userLogoutController", ["$scope", "$uibModalInstance", "noLoginService", "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
+				$http.get(groupListURL, {}, {
+						headers: {
+							"Authorization": noLoginService.user.token_type + " " + noLoginService.user.access_token
+						},
+						data: {},
+						withCredentials: true
+					})
+					.then(function (resp) {
+						if(resp.data && resp.data.value && resp.data.value.length > 0) {
+							var secObjs = _.sortBy(resp.data.value, "Title");
+
+							$http.get(memberGroupURL, {}, {
+									headers: {
+										"Authorization": noLoginService.user.token_type + " " + noLoginService.user.access_token
+									},
+									data: {},
+									withCredentials: true
+								})
+								.then(function (resp2) {
+									var checkedItems = [];
+
+									for(var i = 0; i < secObjs.length; i++) {
+										var value = secObjs[i],
+											secobj = angular.element("<div></div>"),
+											label = angular.element("<label></label>"),
+											chbox = angular.element("<input type='checkbox'/>");
+
+										secobj.addClass("checkbox");
+
+										label.text(value.Title);
+
+										chbox[0].value = value.SecurityObjectID;
+
+										if(_.find(resp2.data.value, {
+												"Title": value.Title
+											})) {
+											chbox[0].checked = true;
+											checkedItems.push(value.GroupID);
+										}
+
+										label.prepend(chbox);
+										group.append(label);
+										el.append(secobj);
+
+										scope.noReset_permission = checkedItems;
+									}
+
+									deferred.resolve();
+								})
+								.catch(deferred.reject);
+						}
+					})
+					.catch(deferred.reject);
+
+				return deferred;
+			}
+
+			return {
+				restrict: "E",
+				link: _link
+			};
+		}])
+		.controller("userLogoutController", ["$scope", "$uibModalInstance", "noLoginService", "noConfig", function ($scope, $uibModalInstance, noLoginService, noConfig) {
 		$scope.logout = function (option) {
 			var clearDatabase,
 				localStores;
@@ -176,7 +243,7 @@
 		};
 	}])
 
-	/*
+		/*
 		@directive noLogoutTimer
 
 	 * noLogoutTimer is a directive that dynamically creates a modal popup that will show after a configured time informing the user that their inactivity
@@ -189,7 +256,7 @@
  	 * |noUser.noLogoutTimer|int|The amount of time in milliseconds of inactivity that elapses before the noLogoutTimer modal dialoge appears.|
 	 *
 	*/
-	.directive("noLogoutTimer", ["$timeout", "noLoginService", "noConfig", "$state", "$rootScope", "$interval", function($timeout, noLoginService, noConfig, $state, $rootScope, $interval){
+		.directive("noLogoutTimer", ["$timeout", "noLoginService", "noConfig", "$state", "$rootScope", "$interval", function($timeout, noLoginService, noConfig, $state, $rootScope, $interval){
 			function _compile(el, attrs){
 				el.html(
 					"<div class='no-logout-container'>" +
@@ -261,6 +328,5 @@
 				compile: _compile
 			};
 	}])
-
 	;
 })(angular);
