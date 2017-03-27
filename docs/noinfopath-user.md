@@ -1,5 +1,5 @@
 # noinfopath-user.js
-@version 2.0.3
+@version 2.0.5
 
 
 The noinfopath.user module contains services, and directives that assist in
