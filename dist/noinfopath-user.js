@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 2.0.5
+ * @version 2.0.6
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -258,7 +258,7 @@
 	 * 	noLoginService.updateUser(userInfo);
 	 * ```
 	 * ##### Parameters
-	 * 
+	 *
 	 * |Name|Type|Description|
 	 * |----|----|-----------|
 	 * |userInfo|Object|An objet that contains the user to be updated, along with the properties to be updated. UserID, Email, and Username are required. FirstName and LastName are optional. |
@@ -308,6 +308,8 @@
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
 					$rootScope.failedLoginAttepts = 0;
+					noInfoPath.setItem($rootScope, "noUser", this.user);
+
 					resolve(this.user);
 				} else {
 

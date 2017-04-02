@@ -238,7 +238,7 @@
 	 * 	noLoginService.updateUser(userInfo);
 	 * ```
 	 * ##### Parameters
-	 * 
+	 *
 	 * |Name|Type|Description|
 	 * |----|----|-----------|
 	 * |userInfo|Object|An objet that contains the user to be updated, along with the properties to be updated. UserID, Email, and Username are required. FirstName and LastName are optional. |
@@ -288,6 +288,8 @@
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
 					$rootScope.failedLoginAttepts = 0;
+					noInfoPath.setItem($rootScope, "noUser", this.user);
+
 					resolve(this.user);
 				} else {
 
