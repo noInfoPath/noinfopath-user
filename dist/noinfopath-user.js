@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 2.0.6
+ * @version 2.0.7
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -264,7 +264,7 @@
 	 * |userInfo|Object|An objet that contains the user to be updated, along with the properties to be updated. UserID, Email, and Username are required. FirstName and LastName are optional. |
 	 *
 	 * ##### Returns
-	 * AngularJS $q Promise Object. The promise returns the response from the RESTAPI.
+	 * AngularJS $q Promise Object. The promise returns the response from the WEBAPI.
 	 *
 	 */
 	function LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
@@ -373,7 +373,7 @@
 
 		this.register = function (registerInfo) {
 			var deferred = $q.defer(),
-				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/register"),
+				url = noUrl.makeResourceUrl(noConfig.current.WEBAPI, "api/account/register"),
 				method = "POST",
 				data = {
 					"Email": registerInfo.email,
@@ -392,7 +392,7 @@
 
 		this.changePassword = function(updatePasswordInfo) {
 			var deferred = $q.defer(),
-				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/changepassword"),
+				url = noUrl.makeResourceUrl(noConfig.current.WEBAPI, "api/account/changepassword"),
 				method = "POST",
 				data = {
 					"UserID": updatePasswordInfo.UserID,
@@ -412,7 +412,7 @@
 
 		this.setPassword = function (setPasswordInfo) {
 			var deferred = $q.defer(),
-				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/setpassword"),
+				url = noUrl.makeResourceUrl(noConfig.current.WEBAPI, "api/account/setpassword"),
 				method = "POST",
 				data = {
 					"UserID": setPasswordInfo.UserID,
@@ -431,7 +431,7 @@
 
 		this.updatePermissions = function (updatePermissionInfo) {
 			var deferred = $q.defer(),
-				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/updatepermissions"),
+				url = noUrl.makeResourceUrl(noConfig.current.WEBAPI, "api/account/updatepermissions"),
 				method = "POST",
 				data = updatePermissionInfo;
 
@@ -466,7 +466,7 @@
 
 		this.updateUser = function (userInfo) {
 			var deferred = $q.defer(),
-				url = noUrl.makeResourceUrl(noConfig.current.NOREST, "api/account/updateuser"),
+				url = noUrl.makeResourceUrl(noConfig.current.WEBAPI, "api/account/updateuser"),
 				method = "POST",
 				data = {
 					"UserID": userInfo.UserID,
