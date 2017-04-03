@@ -470,7 +470,7 @@
 				method = "POST",
 				data = {
 					"UserID": userInfo.UserID,
-					"EmailAddress": userInfo.Email,
+					"EmailAddress": userInfo.EmailAddress,
 					"FirstName": userInfo.FirstName,
 					"LastName": userInfo.LastName,
 					"UserName": userInfo.UserName
