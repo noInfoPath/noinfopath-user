@@ -1,5 +1,5 @@
 # noinfopath-user.js
-@version 2.0.6
+@version 2.0.7
 
 
 The noinfopath.user module contains services, and directives that assist in
@@ -177,7 +177,7 @@ Logs out the current user, and deletes all data stored in local storage.
 |userInfo|Object|An objet that contains the user to be updated, along with the properties to be updated. UserID, Email, and Username are required. FirstName and LastName are optional. |
 
 ##### Returns
-AngularJS $q Promise Object. The promise returns the response from the RESTAPI.
+AngularJS $q Promise Object. The promise returns the response from the WEBAPI.
 
 
 ## noLogin : directive

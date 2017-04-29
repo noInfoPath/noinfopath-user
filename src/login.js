@@ -247,7 +247,7 @@
 	 * AngularJS $q Promise Object. The promise returns the response from the WEBAPI.
 	 *
 	 */
-	function LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
+	function LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service) {
 		var SELF = this,
 			_user;
 
@@ -305,6 +305,19 @@
 				}
 			}.bind(this));
 		}.bind(this);
+
+		this.Auth0 = function(loginInfo) {
+			return new Promise(function(resolve, reject){
+				noAuth0Service.login(loginInfo.username, loginInfo.password, function(err, authResult){
+					if(err){
+						console.error(err);
+						reject();
+					}
+
+					resolve();
+				});
+			});
+		};
 
 		this.login = function (loginInfo) {
 			var deferred = $q.defer(),
@@ -463,7 +476,7 @@
 				.catch(deferred.reject);
 
 			return deferred.promise;
-		}
+		};
 
 		$rootScope.$on("event:auth-loginRequired", function () {
 			$rootScope.$broadcast("noLoginService::loginRequired");
@@ -474,8 +487,8 @@
 		.config(["$httpProvider", function ($httpProvider) {
 			$httpProviderRef = $httpProvider;
 		}])
-		.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noSessionStorage", "noUrl", "noConfig", "$rootScope", "lodash", function ($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _) {
-			return new LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _);
+		.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noSessionStorage", "noUrl", "noConfig", "$rootScope", "lodash", "noAuth0Service", function ($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service) {
+			return new LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service);
 		}])
 	;
 })(angular);
