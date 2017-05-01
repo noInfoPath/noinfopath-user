@@ -5,27 +5,32 @@
 		var noAuth0;
 
 		this.init = function(){
-			noAuth0 = new auth0.Authentication({
+			noAuth0 = new auth0.WebAuth({
 				domain: noConfig.current.auth0.domain,
 				clientID: noConfig.current.auth0.clientId
 			});
 		};
 
 		this.login = function(username, password, callback) {
-			noAuth0.login({
+			noAuth0.client.login({
 				realm: 'Username-Password-Authentication',
 				username: username.$viewValue,
 				password: password.$viewValue,
 				audience: noConfig.current.auth0.audience,
 				response_type: "token",
-				scope: "read:order write:order"
+				scope: "openid profile"
 			}, callback);
 		};
 
+		this.getUserInformation = function(bearer, callback) {
+			noAuth0.client.userInfo(bearer, callback);
+		};
+
 		this.logout = function() {
-      localStorage.removeItem('id_token');
-      localStorage.removeItem('profile');
-      //authManager.unauthenticate();
+			noAuth0.logout({
+				returnTo: "",// URI
+				client_id: ""// clientID
+			});
     };
 	}
 

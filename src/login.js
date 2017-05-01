@@ -311,10 +311,32 @@
 				noAuth0Service.login(loginInfo.username, loginInfo.password, function(err, authResult){
 					if(err){
 						console.error(err);
-						reject();
+						reject(err);
 					}
 
-					resolve();
+					noAuth0Service.getUserInformation(authResult.accessToken, function(err, auth0user){
+						if(err){
+							console.error(err);
+							reject(err);
+						}
+
+						auth0user.access_token = authResult.accessToken;
+						auth0user.expires = authResult.expiresIn;
+
+						var user = new NoInfoPathUser(_, noConfig, auth0user);
+
+						if(!noConfig.current.noUser || noConfig.current.noUser.storeUser){
+							noLocalStorage.setItem("noUser", user);
+						}	else {
+							noSessionStorage.setItem("noUser", user);
+						}
+
+						$rootScope.noUserAuth = true;
+						$rootScope.user = user;
+						$rootScope.failedLoginAttepts = 0;
+
+						resolve(user);
+					});
 				});
 			});
 		};
@@ -455,6 +477,12 @@
 					noLocalStorage.removeItem(stores.dbStores.stores[d]);
 				}
 			}
+		};
+
+		this.logoutAuth0 = function(){
+			// Get userId
+			// Pass userId into this function: noAuth0Service.logout(userId);
+			// call this.logout()
 		};
 
 		this.updateUser = function (userInfo) {

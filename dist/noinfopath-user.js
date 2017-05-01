@@ -331,10 +331,32 @@
 				noAuth0Service.login(loginInfo.username, loginInfo.password, function(err, authResult){
 					if(err){
 						console.error(err);
-						reject();
+						reject(err);
 					}
 
-					resolve();
+					noAuth0Service.getUserInformation(authResult.accessToken, function(err, auth0user){
+						if(err){
+							console.error(err);
+							reject(err);
+						}
+
+						auth0user.access_token = authResult.accessToken;
+						auth0user.expires = authResult.expiresIn;
+
+						var user = new NoInfoPathUser(_, noConfig, auth0user);
+
+						if(!noConfig.current.noUser || noConfig.current.noUser.storeUser){
+							noLocalStorage.setItem("noUser", user);
+						}	else {
+							noSessionStorage.setItem("noUser", user);
+						}
+
+						$rootScope.noUserAuth = true;
+						$rootScope.user = user;
+						$rootScope.failedLoginAttepts = 0;
+
+						resolve(user);
+					});
 				});
 			});
 		};
@@ -940,27 +962,29 @@
 		var noAuth0;
 
 		this.init = function(){
-			noAuth0 = new auth0.Authentication({
+			noAuth0 = new auth0.WebAuth({
 				domain: noConfig.current.auth0.domain,
 				clientID: noConfig.current.auth0.clientId
 			});
 		};
 
 		this.login = function(username, password, callback) {
-			noAuth0.login({
+			noAuth0.client.login({
 				realm: 'Username-Password-Authentication',
 				username: username.$viewValue,
 				password: password.$viewValue,
 				audience: noConfig.current.auth0.audience,
 				response_type: "token",
-				scope: "read:order write:order"
+				scope: "openid profile"
 			}, callback);
 		};
 
+		this.getUserInformation = function(bearer, callback) {
+			noAuth0.client.userInfo(bearer, callback);
+		};
+
 		this.logout = function() {
-      localStorage.removeItem('id_token');
-      localStorage.removeItem('profile');
-      //authManager.unauthenticate();
+
     };
 	}
 
