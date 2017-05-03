@@ -342,6 +342,7 @@
 
 						auth0user.access_token = authResult.accessToken;
 						auth0user.expires = authResult.expiresIn;
+						auth0user.token_type = "Bearer";
 
 						var user = new NoInfoPathUser(_, noConfig, auth0user);
 
@@ -497,6 +498,12 @@
 					noLocalStorage.removeItem(stores.dbStores.stores[d]);
 				}
 			}
+		};
+
+		this.logoutAuth0 = function(){
+			// Get userId
+			// Pass userId into this function: noAuth0Service.logout(userId);
+			// call this.logout()
 		};
 
 		this.updateUser = function (userInfo) {
@@ -984,7 +991,10 @@
 		};
 
 		this.logout = function() {
-
+			noAuth0.logout({
+				returnTo: "",// URI
+				client_id: ""// clientID
+			});
     };
 	}
 

@@ -322,6 +322,7 @@
 
 						auth0user.access_token = authResult.accessToken;
 						auth0user.expires = authResult.expiresIn;
+						auth0user.token_type = "Bearer";
 
 						var user = new NoInfoPathUser(_, noConfig, auth0user);
 

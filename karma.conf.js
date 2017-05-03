@@ -25,11 +25,13 @@ module.exports = function(config) {
 			"node_modules/@noinfopath/noinfopath-data/dist/noinfopath-data.js",
 			"node_modules/@noinfopath/noinfopath-logger/dist/noinfopath-logger.js",
 			"node_modules/angular-ui-router/release/angular-ui-router.js",
+			"node_modules/auth0-js/build/auth0.min.js",
 			"test/mock/configuration.mock.js",
 			"test/mock/nologinservice.mock.js",
 			"test/mock/manifest.mock.js",
 			"test/*.spec.js",
 			"src/globals.js",
+			"src/Auth0.js",
 			"src/login.js",
 			"src/security.js"
 		],
