@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 2.0.8
+ * @version 2.0.9
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -70,25 +70,27 @@
 			securityObjects = noConfigCurrent ? noConfigCurrent.securityObjects : [],
 			tmp, permissions = {};
 
-		if(angular.isObject(data)) {
+
+
+		if (angular.isObject(data)) {
 			tmp = data.data || data;
 		} else {
 			tmp = angular.fromJson(data);
 			tmp = tmp.data || tmp;
 		}
 
-		tmp.acl = angular.fromJson(tmp.acl);
+		tmp.acl = angular.fromJson(tmp.acl || "[]");
 
 		function findAco(objectId, aco) {
 			return aco.securityObjectID.toLowerCase() == objectId.toLowerCase();
 		}
 
-		for(var soi in securityObjects) {
+		for (var soi in securityObjects) {
 			var so = securityObjects[soi],
 				aco = _.find(tmp.acl, findAco.bind(null, so)),
 				soo;
 
-			if(aco) {
+			if (aco) {
 				soo = new NoAccessControl(aco);
 
 				permissions[so] = soo;
@@ -96,7 +98,7 @@
 
 		}
 
-		tmp.permissions = permissions;
+		tmp.permissions = permissions || {};
 
 		angular.extend(this, tmp);
 		this.expires = new Date(Date.parse(this[".expires"]));
@@ -281,17 +283,17 @@
 			},
 			"isAuthorized": {
 				"get": function () {
-					return angular.isObject(this.user) && !this.user.tokenExpired;
+					return angular.isObject(this.user) && this.user.access_token && !this.user.tokenExpired;
 				}
 			},
 			"user": {
 				"get": function () {
 					//console.log("user:get ", _user, angular.isUndefined(_user));
-					if(angular.isUndefined(_user)) {
+					if (angular.isUndefined(_user)) {
 						var u = noLocalStorage.getItem("noUser"),
 							t = noSessionStorage.getItem("noUser"),
 							j = angular.toJson(u ? u : t);
-						if(u || t) {
+						if (u || t) {
 							_user = new NoInfoPathUser(_, noConfig, j);
 						}
 					}
@@ -302,21 +304,22 @@
 		});
 
 		this.whenAuthorized = function () {
+
 			return $q(function (resolve, reject) {
-				if(this.isAuthorized) {
+				if (this.isAuthorized) {
 					$httpProviderRef.defaults.headers.common.Authorization = this.user.token_type + " " + this.user.access_token;
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
 					$rootScope.failedLoginAttepts = 0;
-					noInfoPath.setItem($rootScope, "noUser", this.user);
+					noInfoPath.setItem($rootScope, "noUser", _user);
 
-					resolve(this.user);
+					resolve(_user);
 				} else {
 
-					if($rootScope.failedLoginAttepts === -1) {
+					if ($rootScope.failedLoginAttepts === -1) {
 						reject("authServiceOffline");
 					} else {
-						if($rootScope.failedLoginAttepts > 3) {
+						if ($rootScope.failedLoginAttepts > 3) {
 							reject("tooManyFailedLogons");
 						} else {
 							reject("login");
@@ -326,39 +329,49 @@
 			}.bind(this));
 		}.bind(this);
 
-		this.Auth0 = function(loginInfo) {
-			return new Promise(function(resolve, reject){
-				noAuth0Service.login(loginInfo.username, loginInfo.password, function(err, authResult){
-					if(err){
-						console.error(err);
-						reject(err);
-					}
+		this.Auth0 = function (loginInfo) {
+			return new Promise(function (resolve, reject) {
+				noAuth0Service.login(loginInfo.username, loginInfo.password)
+					.then(function (authPackage) {
+						var auth0User = authPackage.user;
 
-					noAuth0Service.getUserInformation(authResult.accessToken, function(err, auth0user){
-						if(err){
-							console.error(err);
-							reject(err);
-						}
+						auth0User.access_token = authPackage.api.access_token;
+						auth0User.userId = authPackage.user.user_metadata.hsl_user_id;
+						auth0User.first_name = authPackage.user.user_metadata.first_name;
+						auth0User.last_name = authPackage.user.user_metadata.last_name;
+						auth0User.expires =  moment().add(authPackage.api.expires_in, "ms");
+						auth0User.token_type = "Bearer";
 
-						auth0user.access_token = authResult.accessToken;
-						auth0user.expires = authResult.expiresIn;
-						auth0user.token_type = "Bearer";
+						_user = new NoInfoPathUser(_, noConfig, auth0User);
 
-						var user = new NoInfoPathUser(_, noConfig, auth0user);
-
-						if(!noConfig.current.noUser || noConfig.current.noUser.storeUser){
-							noLocalStorage.setItem("noUser", user);
-						}	else {
-							noSessionStorage.setItem("noUser", user);
+						if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
+							noLocalStorage.setItem("noUser", _user);
+						} else {
+							noSessionStorage.setItem("noUser", _user);
 						}
 
 						$rootScope.noUserAuth = true;
-						$rootScope.user = user;
+						$rootScope.user = _user;
 						$rootScope.failedLoginAttepts = 0;
+						console.log(authPackage);
+						console.log(_user);
 
-						resolve(user);
+						resolve(_user);
+					})
+					.catch(function (err) {
+						var msg = "";
+						switch (err.statusCode) {
+						case 403:
+							msg = err.description;
+							$rootScope.failedLoginAttepts++;
+							break;
+						case 0:
+							$rootScope.failedLoginAttepts = -1;
+							msg = "Authentication service is offline.";
+							break;
+						}
+						reject(msg);
 					});
-				});
 			});
 		};
 
@@ -376,9 +389,9 @@
 				.then(function (resp) {
 					var user = new NoInfoPathUser(_, noConfig, resp);
 
-					if(!noConfig.current.noUser || noConfig.current.noUser.storeUser){
+					if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
 						noLocalStorage.setItem("noUser", user);
-					}	else {
+					} else {
 						noSessionStorage.setItem("noUser", user);
 					}
 
@@ -390,15 +403,15 @@
 				})
 				.catch(function (err) {
 					var msg = "";
-					switch(err.status) {
-						case 400:
-							msg = err.data.error_description;
-							$rootScope.failedLoginAttepts++;
-							break;
-						case 0:
-							$rootScope.failedLoginAttepts = -1;
-							msg = "Authentication service is offline.";
-							break;
+					switch (err.status) {
+					case 400:
+						msg = err.data.error_description;
+						$rootScope.failedLoginAttepts++;
+						break;
+					case 0:
+						$rootScope.failedLoginAttepts = -1;
+						msg = "Authentication service is offline.";
+						break;
 					}
 
 					deferred.reject(msg);
@@ -426,7 +439,7 @@
 			return deferred.promise;
 		};
 
-		this.changePassword = function(updatePasswordInfo) {
+		this.changePassword = function (updatePasswordInfo) {
 			var deferred = $q.defer(),
 				url = noUrl.makeResourceUrl(noConfig.current.WEBAPI, "api/account/changepassword"),
 				method = "POST",
@@ -487,20 +500,20 @@
 			noLocalStorage.removeItem("noUser");
 			noSessionStorage.removeItem("noUser");
 
-			if(stores && stores.nonDBStores) {
-				for(var s in stores.nonDBStores) {
+			if (stores && stores.nonDBStores) {
+				for (var s in stores.nonDBStores) {
 					noLocalStorage.removeItem(stores.nonDBStores[s]);
 				}
 			}
 
-			if(cleardb && (stores.dbStores.clearDB === true)) {
-				for(var d in stores.dbStores.stores) {
+			if (cleardb && (stores.dbStores.clearDB === true)) {
+				for (var d in stores.dbStores.stores) {
 					noLocalStorage.removeItem(stores.dbStores.stores[d]);
 				}
 			}
 		};
 
-		this.logoutAuth0 = function(){
+		this.logoutAuth0 = function () {
 			// Get userId
 			// Pass userId into this function: noAuth0Service.logout(userId);
 			// call this.logout()
@@ -538,8 +551,7 @@
 		}])
 		.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noSessionStorage", "noUrl", "noConfig", "$rootScope", "lodash", "noAuth0Service", function ($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service) {
 			return new LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service);
-		}])
-	;
+		}]);
 })(angular);
 
 //directives.js
@@ -565,7 +577,7 @@
 				var validateTemplate = el.find("#username, #password, #loginBtn"),
 					btn = $(validateTemplate[2]);
 
-				if(validateTemplate.length !== 3) throw "noLogin directive requires that the login HTML contain #username, #password, #loginBtn elements."
+				if(validateTemplate.length !== 3) throw "noLogin directive requires that the login HTML contain #username, #password, #loginBtn elements.";
 
 				btn.click(function(e){
 					var data = scope.credentials;
@@ -601,14 +613,14 @@
 					.then(function () {
 						var localStoresExists = noConfig.current.localStores ? true : false,
 							databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
-							logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
+							logoutTemplate = '<div class="modal-header"><h3 class="modal-title">Log Out</h3></div><div class="modal-body text-center">Are you sure you would like to logout?</div><div class="modal-footer center-text"><button class="btn btn-success pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-defualt pull-left" type="button" ng-click="close()">No</button></div>';
 
 						$scope.logoutModal = function () {
 							var modalInstance = $uibModal.open({
 								animation: true,
 								controller: "userLogoutController",
 								backdrop: "static",
-								template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
+								template: logoutTemplate
 							});
 						};
 
@@ -962,43 +974,104 @@
 	;
 })(angular);
 
-(function(angular, auth0, undefined){
+(function (angular, auth0, undefined) {
 	"use strict";
 
-	function NoAuth0Service(noConfig){
+	function NoAuth0Service(noConfig, $http) {
 		var noAuth0;
 
-		this.init = function(){
-			noAuth0 = new auth0.WebAuth({
-				domain: noConfig.current.auth0.domain,
-				clientID: noConfig.current.auth0.clientId
-			});
+		this.init = function () {
+
+			// noAuth0 = new auth0.WebAuth({
+			// 	domain: noConfig.current.auth0.domain,
+			// 	clientID: noConfig.current.auth0.clientId
+			// });
 		};
 
-		this.login = function(username, password, callback) {
-			noAuth0.client.login({
-				realm: 'Username-Password-Authentication',
-				username: username.$viewValue,
-				password: password.$viewValue,
-				audience: noConfig.current.auth0.audience,
-				response_type: "token",
-				scope: "openid profile"
-			}, callback);
+		this.login = function (username, password) {
+
+			var payload = {
+					"client_id": noConfig.current.auth0.clientId,
+					"username": username.$viewValue,
+					"password": password.$viewValue,
+					"connection": "Username-Password-Authentication",
+					"scope": "openid profile user_metadata",
+					"audience": noConfig.current.auth0.audience,
+					"grant_type": "password"
+				},
+				config = {
+					headers: {
+						"Content-Type": "application/json"
+					},
+					responseType: "json"
+				};
+
+			return $http.post(noConfig.current.auth0.ro, payload)
+				.then(function(authInfo){
+					return authInfo.data;
+				})
+				.then(_getUserInformation)
+				.then(_getRESTAPIAccessToken.bind(null, username.$viewValue, password.$viewValue))
+				.catch(function(err){
+					console.error(err);
+				});
 		};
 
-		this.getUserInformation = function(bearer, callback) {
-			noAuth0.client.userInfo(bearer, callback);
-		};
+		function _getUserInformation(authInfo) {
+			var config = {
+					headers: {
+						"Authorization": authInfo.token_type + " " + authInfo.access_token
+					},
+					responseType: "json"
+				};
 
-		this.logout = function() {
+			return $http.get(noConfig.current.auth0.userinfo, config)
+				.then(function(userInfo){
+					console.log(userInfo);
+					return {auth: authInfo, user: userInfo.data};
+				})
+				.catch(function(err){
+					console.error(err);
+				});
+
+		}
+
+		function _getRESTAPIAccessToken(username, password, authPackage) {
+			var payload = {
+					"grant_type":"password",
+					"client_id": noConfig.current.auth0.clientId,
+					"username": username,
+					"password": password,
+					"audience": noConfig.current.auth0.audience,
+					"scope":"openid",
+					"realm":"Username-Password-Authentication"
+				},
+				config = {
+					headers: {
+						"Content-Type": "application/json"
+					},
+					responseType: "json"
+				};
+
+			return $http.post(noConfig.current.auth0.token, payload, config)
+				.then(function(apiInfo){
+					authPackage.api = apiInfo.data;
+
+					return authPackage;
+				})
+				.catch(function(err){
+					console.error(err);
+				});
+		}
+
+		this.logout = function () {
 			noAuth0.logout({
-				returnTo: "",// URI
-				client_id: ""// clientID
+				returnTo: "", // URI
+				client_id: "" // clientID
 			});
-    };
+		};
 	}
 
 	angular.module("noinfopath.user")
-		.service("noAuth0Service", ["noConfig", NoAuth0Service])
-	;
-})(angular, auth0);
+		.service("noAuth0Service", ["noConfig", "$http", NoAuth0Service]);
+})(angular);

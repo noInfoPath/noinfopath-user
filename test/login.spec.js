@@ -4,31 +4,32 @@ var $httpBackend, $timeout, noLocalStorage, noLoginService, noUrl, _, noConfig;
 describe("Testing noinfopath-user module", function () {
 
 	beforeEach(function () {
+		module("noinfopath");
+		module("noinfopath.logger");
+		module("noinfopath.data");
 		module("noinfopath.user");
 
-		// 'noinfopath.data', 'noinfopath.helpers', 'http-auth-interceptor', 'ui.router');
+		// module(function ($provide, noLoginServiceProvider) {
+		// 	$provide.provider("noLoginService", noLoginServiceProvider);
+		// });
 
-		module(function ($provide, noLoginServiceProvider) {
-			$provide.provider("noLoginService", noLoginServiceProvider);
-		});
-
-		// This actually triggers the injection into dummyModule
 		inject(function ($injector) {
 			$httpBackend = $injector.get('$httpBackend');
 			$timeout = $injector.get('$timeout');
-			noLocalStorage = $injector.get('noLocalStorage');
-			noLoginService = $injector.get('noLoginService');
-			noUrl = $injector.get('noUrl');
-			_ = $injector.get("lodash");
 			noConfig = $injector.get("noConfig");
+			noUrl = $injector.get('noUrl');
+			noLocalStorage = $injector.get('noLocalStorage');
+			_ = $injector.get("lodash");
+			noLoginService = $injector.get('noLoginService');
 		});
 
+
 	});
 
 
-	it("Module must implement a provider interface for configuration", function () {
-		expect(noLoginServiceProvider);
-	});
+	// it("Module must implement a provider interface for configuration", function () {
+	// 	expect(noLoginServiceProvider);
+	// });
 
 
 	it("Module must implement all expected services", function () {
@@ -111,11 +112,21 @@ describe("Testing noinfopath-user module", function () {
 					.toBeTruthy();
 			});
 
-			it("noLoginService.isAuthenticated should return true when noLocalStorage.noUser is truthy.", function () {
+			it("noLoginService.isAuthenticated should return true when noLocalStorage.noUser is truthy.", function (done) {
 				var nou = new noInfoPath.NoInfoPathUser(_, noConfig, noLoginServiceMocks.login.noInfoPathUser);
 				noLocalStorage.setItem('noUser', nou);
-				expect(noLoginService.isAuthenticated)
-					.toBe(true);
+
+				noLoginService.whenAuthorized()
+					.then(function(){
+						expect(noLoginService.isAuthenticated)
+							.toBe(true);
+
+						done();
+					})
+					.catch(function(err){
+						console.error(err);
+					});
+
 			});
 
 			it("noLoginService.isAuthenticated should return false when noLocalStorage.noUser is falsy.", function () {

@@ -21,7 +21,7 @@
 				var validateTemplate = el.find("#username, #password, #loginBtn"),
 					btn = $(validateTemplate[2]);
 
-				if(validateTemplate.length !== 3) throw "noLogin directive requires that the login HTML contain #username, #password, #loginBtn elements."
+				if(validateTemplate.length !== 3) throw "noLogin directive requires that the login HTML contain #username, #password, #loginBtn elements.";
 
 				btn.click(function(e){
 					var data = scope.credentials;
@@ -57,14 +57,14 @@
 					.then(function () {
 						var localStoresExists = noConfig.current.localStores ? true : false,
 							databaseLogoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Would You Like To Clear The Database As Well?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout(true)">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="logout(false)">No</button><button class="btn btn-default" type="button" ng-click="close()">Cancel</button></div>',
-							logoutTemplate = '<div class="modal-header"><h3 class="modal-title centertext">Log Out</h3></div><div class="modal-body centertext">Are you sure you would like to logout?</div><div class="modal-footer"><button class="btn btn-warning pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-primary pull-left" type="button" ng-click="close()">No</button></div>';
+							logoutTemplate = '<div class="modal-header"><h3 class="modal-title">Log Out</h3></div><div class="modal-body text-center">Are you sure you would like to logout?</div><div class="modal-footer center-text"><button class="btn btn-success pull-left" type="button" ng-click="logout()">Yes</button><button class="btn btn-defualt pull-left" type="button" ng-click="close()">No</button></div>';
 
 						$scope.logoutModal = function () {
 							var modalInstance = $uibModal.open({
 								animation: true,
 								controller: "userLogoutController",
 								backdrop: "static",
-								template: localStoresExists ? databaseLogoutTemplate : logoutTemplate
+								template: logoutTemplate
 							});
 						};
 
