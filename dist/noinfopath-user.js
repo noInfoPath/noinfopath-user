@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 2.0.9
+ * @version 2.0.10
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -359,17 +359,19 @@
 						resolve(_user);
 					})
 					.catch(function (err) {
+						console.error(err);
 						var msg = "";
-						switch (err.statusCode) {
-						case 403:
-							msg = err.description;
-							$rootScope.failedLoginAttepts++;
-							break;
-						case 0:
-							$rootScope.failedLoginAttepts = -1;
-							msg = "Authentication service is offline.";
-							break;
-						}
+						switch (err.statusCode || err.status) {
+							case 403:
+							case 401:
+								msg = err.description || err.statusText;
+								$rootScope.failedLoginAttepts++;
+								break;
+							case 0:
+								$rootScope.failedLoginAttepts = -1;
+								msg = "Authentication service is offline.";
+								break;
+							}
 						reject(msg);
 					});
 			});
@@ -1013,7 +1015,7 @@
 				.then(_getUserInformation)
 				.then(_getRESTAPIAccessToken.bind(null, username.$viewValue, password.$viewValue))
 				.catch(function(err){
-					console.error(err);
+					throw err;
 				});
 		};
 

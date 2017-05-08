@@ -37,7 +37,7 @@
 				.then(_getUserInformation)
 				.then(_getRESTAPIAccessToken.bind(null, username.$viewValue, password.$viewValue))
 				.catch(function(err){
-					console.error(err);
+					throw err;
 				});
 		};
 
