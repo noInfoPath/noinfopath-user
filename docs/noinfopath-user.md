@@ -1,5 +1,5 @@
 # noinfopath-user.js
-@version 2.0.10
+@version 2.0.11
 
 
 The noinfopath.user module contains services, and directives that assist in
@@ -187,6 +187,9 @@ Sets the credential object and a login function that calls the noLoginService lo
 ## noUserMenu : directive
 
 Sets a logout function on the scope that opens a modal to let the user log out. If there are localStores within the configuration, it also gives the option to clear local storage.
+There is a default logout modal, but this allows for a template to be loaded and displayed via noPrompt.
+Within noConfig, there is now support for a noUser.logoutTemplate which is a path to a html template. If this is not provided, it defaults to a basic noPrompt window.
+
 
 ## noUserGroups : directive
 

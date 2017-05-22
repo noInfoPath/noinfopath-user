@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 2.0.10
+ * @version 2.0.11
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -269,7 +269,7 @@
 	 * AngularJS $q Promise Object. The promise returns the response from the WEBAPI.
 	 *
 	 */
-	function LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service, noTemplateCache) {
+	function LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service) {
 		var SELF = this,
 			_user;
 
@@ -551,8 +551,8 @@
 		.config(["$httpProvider", function ($httpProvider) {
 			$httpProviderRef = $httpProvider;
 		}])
-		.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noSessionStorage", "noUrl", "noConfig", "$rootScope", "lodash", "noAuth0Service", "noTemplateCache", function ($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service, noTemplateCache) {
-			return new LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service, noTemplateCache);
+		.factory("noLoginService", ["$q", "noHTTP", "noLocalStorage", "noSessionStorage", "noUrl", "noConfig", "$rootScope", "lodash", "noAuth0Service", function ($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service) {
+			return new LoginService($q, noHTTP, noLocalStorage, noSessionStorage, noUrl, noConfig, $rootScope, _, noAuth0Service);
 		}]);
 })(angular);
 
@@ -605,6 +605,9 @@
 	 * ## noUserMenu : directive
 	 *
 	 * Sets a logout function on the scope that opens a modal to let the user log out. If there are localStores within the configuration, it also gives the option to clear local storage.
+	 * There is a default logout modal, but this allows for a template to be loaded and displayed via noPrompt.
+	 * Within noConfig, there is now support for a noUser.logoutTemplate which is a path to a html template. If this is not provided, it defaults to a basic noPrompt window.
+	 *
 	 */
 	.directive("noUserMenu", [function () {
 		return {
@@ -624,7 +627,8 @@
 									"Log Out",
 									url,
 									function (e) {
-										switch($(e.target).attr("value")) {
+										switch($(e.target)
+											.attr("value")) {
 											case "clearDb":
 												noLoginService.logout(noConfig.current.localStores, true);
 												location.href = "/";
@@ -649,8 +653,9 @@
 								noPrompt.dialog(
 									"Logout",
 									logoutTemplate,
-									function(e) {
-										switch($(e.target).attr("value")) {
+									function (e) {
+										switch($(e.target)
+											.attr("value")) {
 											case "OK":
 												noLoginService.logout(noConfig.current.localStores, true);
 												location.href = "/";
@@ -658,8 +663,7 @@
 											default:
 												break;
 										}
-									},
-									{
+									}, {
 										height: "15%"
 									}
 								);
