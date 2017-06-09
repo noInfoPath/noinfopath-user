@@ -50,8 +50,6 @@
 			securityObjects = noConfigCurrent ? noConfigCurrent.securityObjects : [],
 			tmp, permissions = {};
 
-
-
 		if (angular.isObject(data)) {
 			tmp = data.data || data;
 		} else {
@@ -79,14 +77,15 @@
 		}
 
 		tmp.permissions = permissions || {};
+		tmp.expires = tmp.expires.valueOf();
 
 		angular.extend(this, tmp);
-		this.expires = new Date(Date.parse(this[".expires"]));
+
 
 		Object.defineProperties(this, {
 			"tokenExpired": {
 				"get": function () {
-					var n = new Date();
+					var n = new Date().valueOf();
 					return n >= this.expires;
 				}
 			}
@@ -94,6 +93,14 @@
 
 		this.getPermissions = function (objectId) {
 			return this.permissions[objectId];
+		};
+
+		this.resolveAuthorization = function() {
+			if(!this.tokenExpired()){
+				return this.token_type + " " + this.access_token;
+			} else {
+				$http.post(noConfig.current.auth0.)
+			}
 		};
 
 	}
@@ -319,7 +326,7 @@
 						auth0User.userId = authPackage.user.user_metadata.hsl_user_id;
 						auth0User.first_name = authPackage.user.user_metadata.first_name;
 						auth0User.last_name = authPackage.user.user_metadata.last_name;
-						auth0User.expires =  moment().add(authPackage.api.expires_in, "ms");
+						auth0User.expires =  moment().add(authPackage.api.expires_in, "s");
 						auth0User.token_type = "Bearer";
 
 						_user = new NoInfoPathUser(_, noConfig, auth0User);

@@ -19,7 +19,7 @@
 					"username": username.$viewValue,
 					"password": password.$viewValue,
 					"connection": "Username-Password-Authentication",
-					"scope": "openid profile user_metadata",
+					"scope": "openid profile user_metadata offline_access",
 					"audience": noConfig.current.auth0.audience,
 					"grant_type": "password"
 				},
