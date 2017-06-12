@@ -98,8 +98,30 @@
 		this.resolveAuthorization = function() {
 			if(!this.tokenExpired()){
 				return this.token_type + " " + this.access_token;
+			} else if (this.refresh_token){
+				var payload = {
+					"grant_type": "refresh_token",
+					"client_id": noConfig.current.auth0.clientId,
+					"refresh_token": this.refresh_token
+				},
+				config = {
+					headers: {
+						"Content-Type": "application/json"
+					},
+					responseType: "json"
+				};
+
+				$http.post(noConfig.current.auth0.token, payload, config)
+					.then(function(resp){
+						Object.assign(this, resp);
+
+						return this.token_type + " " + this.access_token;
+					})
+					.catch(function(err){
+						return new Error(err);
+					});
 			} else {
-				$http.post(noConfig.current.auth0.)
+				return new Error("Authorization Expired");
 			}
 		};
 
