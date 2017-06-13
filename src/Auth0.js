@@ -98,11 +98,7 @@
 							user.access_token = resp.data.access_token;
 							user.expires = moment().add(resp.data.expires_in, "s");
 
-							if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
-								noLocalStorage.setItem("noUser", user);
-							} else {
-								noSessionStorage.setItem("noUser", user);
-							}
+							noInfoPath.saveUser(user);
 
 							resolve(user.token_type + " " + user.access_token);
 						})
@@ -112,7 +108,7 @@
 				} else {
 					reject(new Error("Authorization Expired"));
 				}
-			});
+			}.bind(this));
 
 
 		};

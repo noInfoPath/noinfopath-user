@@ -289,10 +289,8 @@
 				"get": function () {
 					//console.log("user:get ", _user, angular.isUndefined(_user));
 					if (angular.isUndefined(_user)) {
-						var u = noLocalStorage.getItem("noUser"),
-							t = noSessionStorage.getItem("noUser"),
-							j = angular.toJson(u ? u : t);
-						if (u || t) {
+						var j = noInfoPath.loadUser();
+						if (j) {
 							_user = new NoInfoPathUser(_, noConfig, j);
 						}
 					}
@@ -328,8 +326,30 @@
 			}.bind(this));
 		}.bind(this);
 
+		this.loadUser = function() {
+			if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
+				return noLocalStorage.getItem("noUser");
+			} else {
+				return noSessionStorage.getItem("noUser");
+			}
+		}
+		noInfoPath.loadUser = this.loadUser;
+
+		this.saveUser = function(updateUserInfo) {
+
+			var cuser = this.loadUser() || {},
+				uuser = Object.assign(cuser, updateUserInfo);
+
+			if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
+				noLocalStorage.setItem("noUser", uuser);
+			} else {
+				noSessionStorage.setItem("noUser", uuser);
+			}
+		}
+		noInfoPath.saveUser = this.saveUser;
+
 		this.Auth0 = function (loginInfo) {
-			return new Promise(function (resolve, reject) {
+			return $q(function (resolve, reject) {
 				noAuth0Service.login(loginInfo.username, loginInfo.password)
 					.then(function (authPackage) {
 						var auth0User = authPackage.user;
@@ -344,20 +364,16 @@
 
 						_user = new NoInfoPathUser(_, noConfig, auth0User);
 
-						if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
-							noLocalStorage.setItem("noUser", _user);
-						} else {
-							noSessionStorage.setItem("noUser", _user);
-						}
+						this.saveUser(_user)
 
 						$rootScope.noUserAuth = true;
 						$rootScope.user = _user;
 						$rootScope.failedLoginAttepts = 0;
-						console.log(authPackage);
-						console.log(_user);
+						//console.log(authPackage);
+						//console.log(_user);
 
 						resolve(_user);
-					})
+					}.bind(this))
 					.catch(function (err) {
 						console.error(err);
 						var msg = "";
@@ -374,7 +390,7 @@
 							}
 						reject(msg);
 					});
-			});
+			}.bind(this));
 		};
 
 		this.login = function (loginInfo) {
@@ -1124,11 +1140,7 @@
 							user.access_token = resp.data.access_token;
 							user.expires = moment().add(resp.data.expires_in, "s");
 
-							if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
-								noLocalStorage.setItem("noUser", user);
-							} else {
-								noSessionStorage.setItem("noUser", user);
-							}
+							noInfoPath.saveUser(user);
 
 							resolve(user.token_type + " " + user.access_token);
 						})
@@ -1138,7 +1150,7 @@
 				} else {
 					reject(new Error("Authorization Expired"));
 				}
-			});
+			}.bind(this));
 
 
 		};
