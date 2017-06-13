@@ -1,7 +1,7 @@
 //globals.js
 /**
  * # noinfopath-user.js
- * @version 2.0.11
+ * @version 2.0.12
  *
  *
  * The noinfopath.user module contains services, and directives that assist in
@@ -70,8 +70,6 @@
 			securityObjects = noConfigCurrent ? noConfigCurrent.securityObjects : [],
 			tmp, permissions = {};
 
-
-
 		if (angular.isObject(data)) {
 			tmp = data.data || data;
 		} else {
@@ -99,14 +97,15 @@
 		}
 
 		tmp.permissions = permissions || {};
+		tmp.expires = tmp.expires.valueOf();
 
 		angular.extend(this, tmp);
-		this.expires = new Date(Date.parse(this[".expires"]));
+
 
 		Object.defineProperties(this, {
 			"tokenExpired": {
 				"get": function () {
-					var n = new Date();
+					var n = new Date().valueOf();
 					return n >= this.expires;
 				}
 			}
@@ -307,7 +306,7 @@
 
 			return $q(function (resolve, reject) {
 				if (this.isAuthorized) {
-					$httpProviderRef.defaults.headers.common.Authorization = this.user.token_type + " " + this.user.access_token;
+					//$httpProviderRef.defaults.headers.common.Authorization = this.user.token_type + " " + this.user.access_token;
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
 					$rootScope.failedLoginAttepts = 0;
@@ -335,12 +334,13 @@
 					.then(function (authPackage) {
 						var auth0User = authPackage.user;
 
-						auth0User.access_token = authPackage.api.access_token;
-						auth0User.userId = authPackage.user.user_metadata.hsl_user_id;
-						auth0User.first_name = authPackage.user.user_metadata.first_name;
-						auth0User.last_name = authPackage.user.user_metadata.last_name;
-						auth0User.expires =  moment().add(authPackage.api.expires_in, "ms");
+						auth0User.access_token = authPackage.auth.access_token;
+						//auth0User.userId = authPackage.user.user_metadata.hsl_user_id;
+						//auth0User.first_name = ""; //authPackage.user.user_metadata.first_name;
+						//auth0User.last_name = ""; //authPackage.user.user_metadata.last_name;
+						auth0User.expires =  moment().add(authPackage.auth.expires_in, "s");
 						auth0User.token_type = "Bearer";
+						auth0User.refresh_token = authPackage.auth.refresh_token;
 
 						_user = new NoInfoPathUser(_, noConfig, auth0User);
 
@@ -1027,7 +1027,7 @@
 (function (angular, auth0, undefined) {
 	"use strict";
 
-	function NoAuth0Service(noConfig, $http) {
+	function NoAuth0Service($q, noConfig, $http, noLocalStorage, noSessionStorage) {
 		var noAuth0;
 
 		this.init = function () {
@@ -1038,16 +1038,16 @@
 			// });
 		};
 
-		this.login = function (username, password) {
-
+		function _roAuth(username, password) {
 			var payload = {
 					"client_id": noConfig.current.auth0.clientId,
 					"username": username.$viewValue,
 					"password": password.$viewValue,
 					"connection": "Username-Password-Authentication",
-					"scope": "openid profile user_metadata",
+					"scope": "openid profile user_metadata offline_access",
 					"audience": noConfig.current.auth0.audience,
-					"grant_type": "password"
+					"grant_type": "password",
+					"device": "browser"
 				},
 				config = {
 					headers: {
@@ -1056,15 +1056,91 @@
 					responseType: "json"
 				};
 
-			return $http.post(noConfig.current.auth0.ro, payload)
+			return $http.post(noConfig.current.auth0.ro, payload);
+
+
+		}
+
+		function _tokenAuth(username, password) {
+			var payload = {
+					"grant_type":"password",
+					"client_id": noConfig.current.auth0.clientId,
+					"username": username,
+					"password": password,
+					"audience": noConfig.current.auth0.audience,
+					"scope":"openid profile user_metadata offline_access",
+					"realm":"Username-Password-Authentication"
+				},
+				config = {
+					headers: {
+						"Content-Type": "application/json"
+					},
+					responseType: "json"
+				};
+
+
+			return $http.post(noConfig.current.auth0.token, payload, config)
+				.catch(console.error);
+
+		}
+
+		this.login = function (username, password) {
+			return 	_tokenAuth(username, password)
 				.then(function(authInfo){
 					return authInfo.data;
 				})
 				.then(_getUserInformation)
-				.then(_getRESTAPIAccessToken.bind(null, username.$viewValue, password.$viewValue))
+				//.then(_getRESTAPIAccessToken.bind(null, username.$viewValue, password.$viewValue))
 				.catch(function(err){
 					throw err;
 				});
+		};
+
+		this.refresh = function (refresh_token) {
+			var payload = {
+				"grant_type": "refresh_token",
+				"client_id": noConfig.current.auth0.clientId,
+				"refresh_token": refresh_token
+			},
+			config = {
+				headers: {
+					"Content-Type": "application/json"
+				},
+				responseType: "json"
+			};
+
+
+
+			return $http.post(noConfig.current.auth0.token, payload, config);
+		};
+
+		this.resolveAuthorization = function(user) {
+			return $q(function(resolve, reject){
+				if(!user.tokenExpired){
+					resolve(user.token_type + " " + user.access_token);
+				} else if (user.refresh_token){
+					this.refresh(user.refresh_token)
+						.then(function(resp){
+							user.access_token = resp.data.access_token;
+							user.expires = moment().add(resp.data.expires_in, "s");
+
+							if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
+								noLocalStorage.setItem("noUser", user);
+							} else {
+								noSessionStorage.setItem("noUser", user);
+							}
+
+							resolve(user.token_type + " " + user.access_token);
+						})
+						.catch(function(err){
+							reject(err);
+						});
+				} else {
+					reject(new Error("Authorization Expired"));
+				}
+			});
+
+
 		};
 
 		function _getUserInformation(authInfo) {
@@ -1087,31 +1163,6 @@
 		}
 
 		function _getRESTAPIAccessToken(username, password, authPackage) {
-			var payload = {
-					"grant_type":"password",
-					"client_id": noConfig.current.auth0.clientId,
-					"username": username,
-					"password": password,
-					"audience": noConfig.current.auth0.audience,
-					"scope":"openid",
-					"realm":"Username-Password-Authentication"
-				},
-				config = {
-					headers: {
-						"Content-Type": "application/json"
-					},
-					responseType: "json"
-				};
-
-			return $http.post(noConfig.current.auth0.token, payload, config)
-				.then(function(apiInfo){
-					authPackage.api = apiInfo.data;
-
-					return authPackage;
-				})
-				.catch(function(err){
-					console.error(err);
-				});
 		}
 
 		this.logout = function () {
@@ -1123,5 +1174,5 @@
 	}
 
 	angular.module("noinfopath.user")
-		.service("noAuth0Service", ["noConfig", "$http", NoAuth0Service]);
+		.service("noAuth0Service", ["$q", "noConfig", "$http", "noLocalStorage", "noSessionStorage", NoAuth0Service]);
 })(angular);

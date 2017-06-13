@@ -95,36 +95,6 @@
 			return this.permissions[objectId];
 		};
 
-		this.resolveAuthorization = function() {
-			if(!this.tokenExpired()){
-				return this.token_type + " " + this.access_token;
-			} else if (this.refresh_token){
-				var payload = {
-					"grant_type": "refresh_token",
-					"client_id": noConfig.current.auth0.clientId,
-					"refresh_token": this.refresh_token
-				},
-				config = {
-					headers: {
-						"Content-Type": "application/json"
-					},
-					responseType: "json"
-				};
-
-				$http.post(noConfig.current.auth0.token, payload, config)
-					.then(function(resp){
-						Object.assign(this, resp);
-
-						return this.token_type + " " + this.access_token;
-					})
-					.catch(function(err){
-						return new Error(err);
-					});
-			} else {
-				return new Error("Authorization Expired");
-			}
-		};
-
 	}
 	noInfoPath.NoInfoPathUser = NoInfoPathUser;
 
@@ -316,7 +286,7 @@
 
 			return $q(function (resolve, reject) {
 				if (this.isAuthorized) {
-					$httpProviderRef.defaults.headers.common.Authorization = this.user.token_type + " " + this.user.access_token;
+					//$httpProviderRef.defaults.headers.common.Authorization = this.user.token_type + " " + this.user.access_token;
 					//authService.loginConfirmed(user);
 					$rootScope.noUserAuth = true;
 					$rootScope.failedLoginAttepts = 0;
@@ -344,12 +314,13 @@
 					.then(function (authPackage) {
 						var auth0User = authPackage.user;
 
-						auth0User.access_token = authPackage.api.access_token;
-						auth0User.userId = authPackage.user.user_metadata.hsl_user_id;
-						auth0User.first_name = authPackage.user.user_metadata.first_name;
-						auth0User.last_name = authPackage.user.user_metadata.last_name;
-						auth0User.expires =  moment().add(authPackage.api.expires_in, "s");
+						auth0User.access_token = authPackage.auth.access_token;
+						//auth0User.userId = authPackage.user.user_metadata.hsl_user_id;
+						//auth0User.first_name = ""; //authPackage.user.user_metadata.first_name;
+						//auth0User.last_name = ""; //authPackage.user.user_metadata.last_name;
+						auth0User.expires =  moment().add(authPackage.auth.expires_in, "s");
 						auth0User.token_type = "Bearer";
+						auth0User.refresh_token = authPackage.auth.refresh_token;
 
 						_user = new NoInfoPathUser(_, noConfig, auth0User);
 
