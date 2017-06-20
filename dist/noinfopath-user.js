@@ -101,12 +101,14 @@
 
 		angular.extend(this, tmp);
 
+		this.userId = tmp.id;
 
 		Object.defineProperties(this, {
 			"tokenExpired": {
 				"get": function () {
-					var n = new Date().valueOf();
-					return n >= this.expires;
+					var n = (new Date()).valueOf(),
+						e = (new Date(this.expires)).valueOf();
+					return n >= e;
 				}
 			}
 		});
@@ -282,7 +284,7 @@
 			},
 			"isAuthorized": {
 				"get": function () {
-					return angular.isObject(this.user) && this.user.access_token && !this.user.tokenExpired;
+					return angular.isObject(this.user) && this.user.access_token && (!this.user.tokenExpired || !!this.user.refresh_token);
 				}
 			},
 			"user": {
