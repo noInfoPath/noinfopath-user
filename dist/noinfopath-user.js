@@ -329,12 +329,12 @@
 		}.bind(this);
 
 		this.loadUser = function() {
-			if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
+			if (noConfig.current && (!noConfig.current.noUser || noConfig.current.noUser.storeUser)) {
 				return noLocalStorage.getItem("noUser");
 			} else {
 				return noSessionStorage.getItem("noUser");
 			}
-		}
+		};
 		noInfoPath.loadUser = this.loadUser;
 
 		this.saveUser = function(updateUserInfo) {
@@ -342,12 +342,12 @@
 			var cuser = this.loadUser() || {},
 				uuser = Object.assign(cuser, updateUserInfo);
 
-			if (!noConfig.current.noUser || noConfig.current.noUser.storeUser) {
+			if (noConfig.current && (!noConfig.current.noUser || noConfig.current.noUser.storeUser)) {
 				noLocalStorage.setItem("noUser", uuser);
 			} else {
 				noSessionStorage.setItem("noUser", uuser);
 			}
-		}
+		};
 		noInfoPath.saveUser = this.saveUser;
 
 		this.Auth0 = function (loginInfo) {
